@@ -1,4 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
-  <rect width="192" height="192" rx="32" fill="#0075de"/>
-  <text x="96" y="120" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="84" fill="#ffffff">$</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <rect width="192" height="192" rx="42" fill="#1a1814"/>
+  <text x="50%" y="55%" text-anchor="middle" dominant-baseline="middle"
+        font-family="Fraunces, Georgia, serif" font-weight="500"
+        font-size="128" font-style="italic" fill="#f1ede6"
+        letter-spacing="-4">N</text>
+  <circle cx="148" cy="148" r="10" fill="#c5471e"/>
 </svg>

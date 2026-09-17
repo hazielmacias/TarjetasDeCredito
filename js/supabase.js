@@ -2,7 +2,7 @@
  * Cliente Supabase (CDN UMD).
  * Se carga una sola vez desde el index.html y se expone aquí.
  */
-import { SUPABASE_CONFIG } from './config.js';
+import { SUPABASE_CONFIG, SHARED_CREDS } from './config.js';
 
 let _client = null;
 
@@ -41,14 +41,26 @@ export async function getSession() {
   return data.session ?? null;
 }
 
-export async function signInAnonymously() {
+/**
+ * Login con credenciales fijas compartidas.
+ *
+ * Ambos dispositivos entran con el mismo usuario (`haziel@nf.local`).
+ * La distinción entre "este gasto es de Haziel o de Areli" se hace
+ * con el campo `owner` en cada expense/payment.
+ *
+ * Credenciales fueron creadas via Edge Function `bootstrap-users`.
+ */
+export async function signInShared() {
   const sb = await getSupabase();
   let { data } = await sb.auth.getSession();
   if (data?.session) return data.session;
 
-  // Login anónimo vía signInAnonymously (Supabase >= 2.0 lo soporta)
-  const { data: sign, error } = await sb.auth.signInAnonymously();
+  const { data: sign, error } = await sb.auth.signInWithPassword({
+    email: SHARED_CREDS.email,
+    password: SHARED_CREDS.password
+  });
   if (error) throw error;
+
   return sign.session;
 }
 

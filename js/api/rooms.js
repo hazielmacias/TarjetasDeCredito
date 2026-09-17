@@ -1,4 +1,4 @@
-import { getSupabase, signInAnonymously } from '../supabase.js';
+import { getSupabase, signInShared } from '../supabase.js';
 import { ROOM_ACCESS_CODE } from '../config.js';
 
 /**
@@ -6,11 +6,10 @@ import { ROOM_ACCESS_CODE } from '../config.js';
  * Si el código coincide con uno existente se une; si no existe se crea.
  */
 export async function joinOrCreateRoom(deviceName = 'Dispositivo') {
-  await signInAnonymously();
-  const sb = await getSupabase();
-  const { data: { session } } = await sb.auth.getSession();
+  const session = await signInShared();
   if (!session) throw new Error('Sin sesión');
 
+  const sb = await getSupabase();
   const res = await sb.functions.invoke('join-room', {
     body: {
       access_code: ROOM_ACCESS_CODE,

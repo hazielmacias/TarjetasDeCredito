@@ -10,7 +10,7 @@ import { categoriesView } from './views/categories.js';
 import { settingsView } from './views/settings.js';
 import { historyView } from './views/history.js';
 
-import { signInAnonymously, getSession } from './supabase.js';
+import { signInShared, getSession } from './supabase.js';
 
 // Registrar service worker
 if ('serviceWorker' in navigator) {

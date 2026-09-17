@@ -10,4 +10,16 @@ const SUPABASE_CONFIG = {
 
 const ROOM_ACCESS_CODE = '1234';
 
-export { SUPABASE_CONFIG, ROOM_ACCESS_CODE };
+/**
+ * Credenciales compartidas. Ambos dispositivos usan la misma
+ * cuenta autenticada; la distinción entre "Haziel" y "Areli"
+ * se hace por el campo `owner` en expenses y payments.
+ *
+ * Creado via Edge Function `bootstrap-users`.
+ */
+const SHARED_CREDS = {
+  email: 'haziel@nf.local',
+  password: 'nf-haziel-2026'
+};
+
+export { SUPABASE_CONFIG, ROOM_ACCESS_CODE, SHARED_CREDS };
