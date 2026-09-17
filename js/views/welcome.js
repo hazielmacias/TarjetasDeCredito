@@ -65,14 +65,35 @@ export async function welcomeView(root) {
     btn.innerHTML = '<span class="spinner"></span> Conectando...';
     status.textContent = '';
     try {
-      const { room: r, session: s } = await joinOrCreateRoom(navigator.userAgent?.includes('Mobile') ? 'Móvil' : 'Web');
-      setState({ room: r, session: s });
-      await seedDefaultsIfNeeded(r.id);
-      await refreshAll();
-      await watchRoom();
+      const result = await joinOrCreateRoom(navigator.userAgent?.includes('Mobile') ? 'Móvil' : 'Web');
+      const r = result.room;
+
+      const sb = await getSupabase();
+      const { data: { session: currentSession } } = await sb.auth.getSession();
+
+      setState({ room: r, session: currentSession });
+
+      try {
+        await seedDefaultsIfNeeded(r.id);
+      } catch (seedErr) {
+        console.warn('seedDefaults falló (continúa):', seedErr);
+      }
+
+      try {
+        await refreshAll();
+      } catch (refErr) {
+        console.warn('refreshAll falló (continúa):', refErr);
+      }
+
+      try {
+        await watchRoom();
+      } catch (watchErr) {
+        console.warn('watchRoom falló (continúa):', watchErr);
+      }
+
       navigate('/');
     } catch (e) {
-      console.error(e);
+      console.error('enter error:', e);
       status.innerHTML = `<span style="color:var(--clay)">${e.message || 'Error al conectar'}</span>`;
       btn.disabled = false;
       btn.innerHTML = 'Entrar a la sala';

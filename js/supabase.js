@@ -52,14 +52,25 @@ export async function getSession() {
  */
 export async function signInShared() {
   const sb = await getSupabase();
+
+  // Intentar reusar sesión existente; si está expirada o falla, hacer login limpio.
   let { data } = await sb.auth.getSession();
-  if (data?.session) return data.session;
+  if (data?.session) {
+    // Verificar que la sesión aún es válida pidiendo el user
+    const { data: userData, error: userErr } = await sb.auth.getUser();
+    if (!userErr && userData?.user) {
+      return data.session;
+    }
+    // Sesión inválida — limpiarla
+    await sb.auth.signOut().catch(() => {});
+  }
 
   const { data: sign, error } = await sb.auth.signInWithPassword({
     email: SHARED_CREDS.email,
     password: SHARED_CREDS.password
   });
   if (error) throw error;
+  if (!sign?.session) throw new Error('No se pudo iniciar sesión');
 
   return sign.session;
 }
