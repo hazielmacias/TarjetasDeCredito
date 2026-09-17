@@ -1,6 +1,6 @@
 /* Service Worker — Nuestras Finanzas */
-const CACHE_NAME = 'nf-v1';
-const PRECACHE = ['/', '/index.html', '/manifest.json', '/css/styles.css', '/js/app.js'];
+const CACHE_NAME = 'nf-v2';
+const PRECACHE = ['./', './index.html', './manifest.json', './css/styles.css', './js/app.js'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -28,14 +28,14 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
         }
         return res;
-      }).catch(() => caches.match('/index.html'));
+      }).catch(() => caches.match('./index.html'));
     })
   );
 });
 
 /* ===== Push notifications ===== */
 self.addEventListener('push', (event) => {
-  let payload = { title: 'Nuestras Finanzas', body: 'Tienes un recordatorio.', url: '/' };
+  let payload = { title: 'Nuestras Finanzas', body: 'Tienes un recordatorio.', url: './' };
   try {
     if (event.data) payload = { ...payload, ...event.data.json() };
   } catch (e) {}
@@ -43,9 +43,9 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification(payload.title, {
       body: payload.body,
-      icon: '/assets/icons/icon-192.png',
-      badge: '/assets/icons/icon-192.png',
-      data: { url: payload.url || '/' },
+      icon: './assets/icons/icon-192.png',
+      badge: './assets/icons/icon-192.png',
+      data: { url: payload.url || './' },
       tag: payload.tag || 'nf-reminder',
       requireInteraction: false,
       vibrate: [200, 100, 200]
@@ -55,7 +55,7 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const url = event.notification.data?.url || '/';
+  const url = event.notification.data?.url || './';
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       for (const client of clientList) {
