@@ -40,8 +40,8 @@ export async function homeView(root) {
       <section class="page-enter page">
         <div class="page-header">
           <div class="row-between" style="margin-bottom:32px">
-            <div class="brand-mark"><span class="dot"></span>N · F</div>
-            <span class="folio">Folio · ${String(new Date().getDate()).padStart(2,'0')}.${String(month).padStart(2,'0')}</span>
+            <div class="brand-mark"><span class="dot"></span></div>
+            <span></span>
           </div>
 
           <div style="margin-bottom:6px">

@@ -161,8 +161,8 @@ export async function expenseFormView(root, qs = {}) {
         <div>
           <label class="label">¿De quién?</label>
           <div class="chip-group" id="f-owner-group">
-            <button type="button" class="chip active" data-val="Haziel">Haziel</button>
-            <button type="button" class="chip" data-val="Areli">Areli</button>
+            <button type="button" class="chip ${deviceOwner === 'Haziel' ? 'active' : ''}" data-val="Haziel">Haziel</button>
+            <button type="button" class="chip ${deviceOwner === 'Areli' ? 'active' : ''}" data-val="Areli">Areli</button>
           </div>
         </div>
 
@@ -176,7 +176,8 @@ export async function expenseFormView(root, qs = {}) {
     </section>
   `;
 
-  let selected = { category: null, method: 'card', card: null, owner: 'Haziel' };
+  const deviceOwner = (() => { try { return localStorage.getItem('nf-device-owner') || 'Haziel'; } catch { return 'Haziel'; } })();
+  let selected = { category: null, method: 'card', card: null, owner: deviceOwner };
 
   function updateCardVisibility() {
     root.querySelector('#f-cards-wrap').style.display = selected.method === 'card' ? 'block' : 'none';

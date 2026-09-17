@@ -10,8 +10,9 @@ import { setState } from '../store.js';
 
 export async function settingsView(root) {
   let state = getState();
-  const unsubscribe = subscribe((s) => { state = s; render(); });
   let pushOn = await isPushSubscribed();
+  let deviceOwner = (() => { try { return localStorage.getItem('nf-device-owner') || 'Haziel'; } catch { return 'Haziel'; } })();
+  const unsubscribe = subscribe((s) => { state = s; render(); });
 
   function render() {
     const { room, cards, expenses, payments, categories } = state;
@@ -24,6 +25,23 @@ export async function settingsView(root) {
         </div>
 
         <div class="stack-loose">
+          <div class="card">
+            <div class="section-header">
+              <span class="t-eyebrow">Este dispositivo es de...</span>
+            </div>
+            <div class="chip-group" id="owner-toggle" style="gap:12px">
+              <button type="button" class="chip ${deviceOwner === 'Haziel' ? 'active' : ''}" data-val="Haziel" style="padding:14px 18px;font-size:14px;flex:1;justify-content:center">
+                <span style="width:10px;height:10px;border-radius:50%;background:var(--aegean);display:inline-block;margin-right:6px"></span>
+                Haziel
+              </button>
+              <button type="button" class="chip ${deviceOwner === 'Areli' ? 'active' : ''}" data-val="Areli" style="padding:14px 18px;font-size:14px;flex:1;justify-content:center">
+                <span style="width:10px;height:10px;border-radius:50%;background:var(--plum);display:inline-block;margin-right:6px"></span>
+                Areli
+              </button>
+            </div>
+            <div class="t-small" style="margin-top:8px">Esto pre-selecciona quién eres al registrar un gasto en este dispositivo.</div>
+          </div>
+
           <div class="card">
             <div class="section-header">
               <span class="t-eyebrow">Identidad</span>
@@ -104,6 +122,15 @@ export async function settingsView(root) {
     `;
 
     root.appendChild(renderBottomNav());
+
+    root.querySelector('#owner-toggle').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-val]');
+      if (!b) return;
+      deviceOwner = b.dataset.val;
+      try { localStorage.setItem('nf-device-owner', deviceOwner); } catch {}
+      toast(`Eres ${deviceOwner} en este dispositivo`);
+      render();
+    });
 
     root.querySelector('#save-room').onclick = async () => {
       try {
