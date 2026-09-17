@@ -6,37 +6,38 @@ const METHOD_LABELS = {
   transfer: 'Transferencia'
 };
 
+function avatarFromPlace(place, color) {
+  const letter = (place || '·').trim().slice(0, 1).toUpperCase();
+  return `<div class="avatar" style="background:${color || 'var(--ink)'}">${letter}</div>`;
+}
+
 export function expenseItem(e, { category, card }) {
-  const dot = category ? `<span class="inline-block w-2 h-2 rounded-full" style="background:${category.color}"></span>` : '';
-  const methodLabel = METHOD_LABELS[e.payment_method] || '—';
-  const cardLabel = card ? card.name : methodLabel;
-  const ownerPill = e.owner ? `
-    <span class="pill ${e.owner === 'Haziel' ? 'pill-sky' : 'pill-coral'}" style="padding:2px 8px;font-size:11px">${e.owner}</span>
-  ` : '';
+  const color = category?.color || 'var(--ink-40)';
+  const methodLabel = card ? card.name : METHOD_LABELS[e.payment_method] || '—';
+  const ownerClass = e.owner === 'Haziel' ? 'pill-haziel' : e.owner === 'Areli' ? 'pill-areli' : '';
+
   return `
-    <div class="list-item" data-id="${e.id}">
-      <div class="flex-1 min-w-0">
-        <div class="flex items-center gap-2 mb-1">
-          ${dot}
-          <span class="font-medium text-ink-black truncate">${e.place}</span>
-          ${ownerPill}
-        </div>
-        <div class="text-xs text-stone flex items-center gap-2">
-          <span>${cardLabel}</span>
-          <span>·</span>
-          <span>${fechaCorta(e.date)}</span>
+    <div class="list-row" data-id="${e.id}">
+      ${avatarFromPlace(e.place, color)}
+      <div style="flex:1;min-width:0">
+        <div class="name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.place}</div>
+        <div class="meta" style="margin-top:2px">
+          ${category ? category.name : 'Sin categoría'} · ${methodLabel} · ${fechaCorta(e.date)}
         </div>
       </div>
-      <div class="font-semibold text-balance">${mxn(e.amount)}</div>
+      <div class="right">
+        <div class="amount">${mxn(e.amount)}</div>
+        ${e.owner ? `<div style="margin-top:4px"><span class="pill ${ownerClass}">${e.owner}</span></div>` : ''}
+      </div>
     </div>
   `;
 }
 
-export function expenseList(expenses, { categories, cards, emptyText = 'Sin gastos este mes' } = {}) {
+export function expenseList(expenses, { categories, cards, emptyText = 'Sin movimientos este mes' } = {}) {
   if (!expenses.length) {
-    return `<div class="empty-state">${emptyText}</div>`;
+    return `<div class="empty">${emptyText}</div>`;
   }
-  return `<div class="divide-hairline">${expenses.map((e) => expenseItem(e, {
+  return `<div class="list">${expenses.map((e) => expenseItem(e, {
     category: categories?.find((c) => c.id === e.category_id),
     card: e.card_id ? cards?.find((c) => c.id === e.card_id) : null
   })).join('')}</div>`;

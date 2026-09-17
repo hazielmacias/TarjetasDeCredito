@@ -2,8 +2,7 @@ import { joinOrCreateRoom } from '../api/rooms.js';
 import { setState, getState } from '../store.js';
 import { navigate } from '../router.js';
 import { refreshAll, watchRoom } from '../api/sync.js';
-import { DEFAULT_CATEGORIES } from '../api/categories.js';
-import { createCategory } from '../api/categories.js';
+import { DEFAULT_CATEGORIES, createCategory } from '../api/categories.js';
 import { getSupabase } from '../supabase.js';
 import { toast } from '../utils/ui.js';
 
@@ -11,43 +10,50 @@ export async function welcomeView(root) {
   const { session, room } = getState();
 
   root.innerHTML = `
-    <section class="page-enter px-6 pt-16 pb-10 min-h-screen flex flex-col">
-      <div class="text-center mb-12">
-        <div class="inline-flex items-center gap-2 mb-4">
-          <span class="inline-block w-10 h-10 rounded-card gradient-sky"></span>
+    <section class="page-enter page" style="min-height:100vh;display:flex;flex-direction:column;padding-top:48px;padding-bottom:24px">
+      <div class="row-between" style="margin-bottom:48px">
+        <div class="brand-mark"><span class="dot"></span>N · F</div>
+        <span class="folio">Folio · 0001</span>
+      </div>
+
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+        <div style="margin-bottom:8px">
+          <span class="t-eyebrow">Edición compartida</span>
         </div>
-        <h1 class="heading-xl mb-3">
-          Nuestras <span class="highlight-pill">Finanzas</span>
+
+        <h1 class="t-display-xl" style="margin:0">
+          Nuestras<br>
+          <span class="hl-pill">finanzas</span>,
+          <span class="t-display-italic" style="color:var(--ink-60)">juntas</span>.
         </h1>
-        <p class="body-serif max-w-sm mx-auto">
-          Tarjetas, pagos y gastos en un solo lugar — juntos pero ordenados.
+
+        <p class="t-serif-body" style="margin-top:24px;max-width:340px">
+          Tarjetas, pagos y gastos compartidos en un cuaderno
+          que ambos pueden leer — sin contraseñas, sin caos.
         </p>
       </div>
 
-      <div class="space-y-3 max-w-sm mx-auto w-full">
-        <div class="card-tight card">
-          <div class="flex items-start gap-3 mb-3">
-            <div class="w-9 h-9 rounded-card bg-sky-tint flex items-center justify-center">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4a1 1 0 0 1-1-1v-5h-4v5a1 1 0 0 1-1 1H5a2 2 0 0 1-2-2v-9z" stroke="#0075de" stroke-width="1.6" stroke-linejoin="round"/>
-              </svg>
-            </div>
-            <div class="flex-1">
-              <div class="heading-sm">Código compartido</div>
-              <p class="text-xs text-stone">Usa <strong>1234</strong> en ambos dispositivos.</p>
+      <div class="stack">
+        <div class="card card-tinted">
+          <div class="row" style="align-items:flex-start">
+            <div style="width:36px;height:36px;border-radius:50%;background:var(--ink);color:var(--paper);display:flex;align-items:center;justify-content:center;font-family:var(--f-display);font-weight:600;font-size:14px;flex-shrink:0">1234</div>
+            <div style="flex:1">
+              <div style="font-family:var(--f-ui);font-weight:500;font-size:14px">Código compartido</div>
+              <div class="t-small">Usa <span class="t-mono" style="color:var(--clay);font-weight:600">1234</span> en ambos dispositivos para entrar a la misma sala.</div>
             </div>
           </div>
         </div>
 
-        <button id="enter-btn" class="btn btn-primary btn-block btn-lg">
-          Entrar
+        <button id="enter-btn" class="btn btn-ink btn-block btn-lg">
+          Entrar a la sala
         </button>
-        <button id="reset-btn" class="btn btn-text btn-block btn-sm">
+
+        <button id="reset-btn" class="btn btn-ghost btn-block btn-sm">
           Cerrar sesión de este dispositivo
         </button>
       </div>
 
-      <div id="status" class="text-center text-xs text-stone mt-6"></div>
+      <div id="status" class="t-small" style="text-align:center;margin-top:16px;min-height:18px"></div>
     </section>
   `;
 
@@ -67,9 +73,9 @@ export async function welcomeView(root) {
       navigate('/');
     } catch (e) {
       console.error(e);
-      status.innerHTML = `<span class="text-coral">${e.message || 'Error al conectar'}</span>`;
+      status.innerHTML = `<span style="color:var(--clay)">${e.message || 'Error al conectar'}</span>`;
       btn.disabled = false;
-      btn.innerHTML = 'Entrar';
+      btn.innerHTML = 'Entrar a la sala';
     }
   }
 

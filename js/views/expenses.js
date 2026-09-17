@@ -4,7 +4,6 @@ import { renderBottomNav } from '../components/bottom-nav.js';
 import { expenseList } from '../components/expense-item.js';
 import { modal, toast } from '../utils/ui.js';
 import { navigate } from '../router.js';
-import { setMonth } from '../store.js';
 
 export async function expensesView(root) {
   let state = getState();
@@ -33,32 +32,38 @@ export async function expensesView(root) {
       .slice(0, 4);
 
     root.innerHTML = `
-      <section class="page-enter px-5 pt-6">
-        <header class="mb-5 flex items-center justify-between">
+      <section class="page-enter page">
+        <div class="page-header row-between">
           <div>
-            <h1 class="heading-xl">Gastos</h1>
-            <p class="text-sm text-stone mt-1">${monthExpenses.length} este mes · ${mxn(total)}</p>
+            <span class="t-eyebrow">Movimientos</span>
+            <h1 class="t-display" style="margin-top:4px">Gastos</h1>
+            <div class="t-small" style="margin-top:4px"><span class="t-mono">${monthExpenses.length}</span> este mes · <span class="t-mono">${mxn(total)}</span></div>
           </div>
-          <button class="btn btn-primary" id="add-exp">+ Agregar</button>
-        </header>
+          <button class="btn btn-ink btn-sm" id="add-exp">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Agregar
+          </button>
+        </div>
 
         ${topCategories.length ? `
-          <div class="mb-5">
-            <div class="section-title">Por categoría</div>
+          <div style="margin-bottom:32px">
+            <div class="section-header">
+              <span class="t-eyebrow">Por categoría</span>
+            </div>
             <div class="card">
               ${topCategories.map((t) => {
                 const pct = total > 0 ? (t.amount / total) * 100 : 0;
                 return `
-                  <div class="mb-3 last:mb-0">
-                    <div class="flex justify-between text-sm mb-1">
-                      <span class="flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full" style="background:${t.category.color}"></span>
-                        ${t.category.name}
-                      </span>
-                      <span class="font-semibold text-balance">${mxn(t.amount)}</span>
+                  <div style="margin-bottom:16px">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                      <div style="display:flex;align-items:center;gap:8px">
+                        <span style="width:8px;height:8px;border-radius:50%;background:${t.category.color}"></span>
+                        <span style="font-size:13.5px;font-weight:500">${t.category.name}</span>
+                      </div>
+                      <span class="amount" style="font-size:14px">${mxn(t.amount)}</span>
                     </div>
-                    <div class="h-1.5 rounded-pill bg-paper-warmth overflow-hidden">
-                      <div class="h-full rounded-pill" style="width:${pct}%;background:${t.category.color}"></div>
+                    <div class="progress">
+                      <div class="progress-bar" style="width:${pct}%;background:${t.category.color}"></div>
                     </div>
                   </div>
                 `;
@@ -67,14 +72,16 @@ export async function expensesView(root) {
           </div>
         ` : ''}
 
-        <div class="mb-5">
-          <div class="section-title">Movimientos</div>
-          ${expenseList(monthExpenses, { categories, cards, emptyText: 'Sin gastos este mes' })}
+        <div>
+          <div class="section-header">
+            <span class="t-eyebrow">Movimientos del mes</span>
+          </div>
+          ${expenseList(monthExpenses, { categories, cards, emptyText: 'Sin gastos este mes.' })}
         </div>
       </section>
 
-      <button class="fab" id="fab">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <button class="fab" id="fab" aria-label="Nuevo gasto">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
     `;
 
@@ -97,17 +104,20 @@ export async function expenseFormView(root, qs = {}) {
   const { cards, categories, room, currentMonth } = state;
 
   root.innerHTML = `
-    <section class="page-enter px-5 pt-6">
-      <header class="mb-5 flex items-center justify-between">
-        <button class="btn btn-text btn-sm" id="back">← Volver</button>
-        <h1 class="heading-md">Nuevo gasto</h1>
-        <span></span>
-      </header>
+    <section class="page-enter page">
+      <div class="page-header with-back">
+        <div class="row" style="justify-content:space-between">
+          <button class="btn-link btn-link-back btn-sm" id="back" style="border:none;cursor:pointer;background:transparent">Volver</button>
+          <span class="t-eyebrow-mono">Nuevo</span>
+          <span style="width:50px"></span>
+        </div>
+        <h1 class="t-display" style="margin-top:12px">Gasto</h1>
+      </div>
 
-      <div class="space-y-4">
+      <div class="stack-loose">
         <div>
-          <label class="label">Monto (MXN)</label>
-          <input class="input" type="number" step="0.01" min="0" id="f-amount" placeholder="0.00" autofocus inputmode="decimal" />
+          <label class="label">Monto</label>
+          <input class="input t-mono-lg" type="number" step="0.01" min="0" id="f-amount" placeholder="0.00" autofocus inputmode="decimal" style="font-size:32px" />
         </div>
 
         <div>
@@ -119,8 +129,8 @@ export async function expenseFormView(root, qs = {}) {
           <label class="label">Categoría</label>
           <div class="chip-group" id="f-cat-group">
             ${categories.map((c) => `
-              <button type="button" class="chip" data-id="${c.id}" data-color="${c.color}" style="--c:${c.color}">
-                <span class="w-2 h-2 rounded-full" style="background:${c.color}"></span>
+              <button type="button" class="chip" data-id="${c.id}">
+                <span style="width:8px;height:8px;border-radius:50%;background:${c.color};display:inline-block"></span>
                 ${c.name}
               </button>
             `).join('')}
@@ -140,8 +150,8 @@ export async function expenseFormView(root, qs = {}) {
           <label class="label">Tarjeta</label>
           <div class="chip-group" id="f-cards-group">
             ${cards.map((c) => `
-              <button type="button" class="chip" data-id="${c.id}" style="border-color:${c.color}">
-                <span class="w-2 h-2 rounded-full" style="background:${c.color}"></span>
+              <button type="button" class="chip" data-id="${c.id}">
+                <span style="width:8px;height:8px;border-radius:50%;background:${c.color};display:inline-block"></span>
                 ${c.name}
               </button>
             `).join('')}
@@ -161,7 +171,7 @@ export async function expenseFormView(root, qs = {}) {
           <input class="input" type="date" id="f-date" value="${hoyISO()}" />
         </div>
 
-        <button class="btn btn-primary btn-block btn-lg" id="f-save">Guardar gasto</button>
+        <button class="btn btn-ink btn-block btn-lg" id="f-save">Guardar gasto</button>
       </div>
     </section>
   `;
@@ -233,23 +243,31 @@ function openExpenseDetail(id) {
   const card = e.card_id ? cards.find((c) => c.id === e.card_id) : null;
 
   modal(`
+    <div class="modal-handle"></div>
     <div class="modal-header">
-      <h3 class="heading-md">Detalle del gasto</h3>
-      <button class="btn btn-text btn-sm" data-act="close">✕</button>
+      <div>
+        <span class="t-eyebrow">Detalle</span>
+        <h3 class="t-display-sm" style="margin-top:2px">${e.place}</h3>
+      </div>
+      <button class="btn btn-ghost btn-sm" data-act="close">✕</button>
     </div>
-    <div class="modal-body">
-      <div class="text-center mb-4">
-        <div class="kpi-value">${mxn(e.amount)}</div>
-        <div class="text-stone text-sm mt-1">${e.place}</div>
+    <div class="modal-body stack">
+      <div class="hero-stat grain">
+        <div class="content">
+          <div class="stat-label">Monto</div>
+          <div class="stat-value"><span class="unit">$</span>${mxn(e.amount).replace('$','').trim()}</div>
+          <div style="margin-top:6px;font-family:var(--f-mono);font-size:10.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-60)">${fechaCorta(e.date)}</div>
+        </div>
       </div>
-      <div class="space-y-2 text-sm">
-        <div class="flex justify-between"><span class="text-stone">Fecha</span><span>${fechaCorta(e.date)}</span></div>
-        <div class="flex justify-between"><span class="text-stone">Categoría</span><span>${cat?.name || '—'}</span></div>
-        <div class="flex justify-between"><span class="text-stone">Método</span><span>${e.payment_method === 'card' ? 'Tarjeta' : e.payment_method === 'cash' ? 'Efectivo' : 'Transferencia'}</span></div>
-        ${card ? `<div class="flex justify-between"><span class="text-stone">Tarjeta</span><span>${card.name}</span></div>` : ''}
-        <div class="flex justify-between"><span class="text-stone">Dueño</span><span>${e.owner || '—'}</span></div>
+
+      <div class="card stack-tight">
+        ${cat ? `<div class="row-between"><span class="t-small">Categoría</span><span style="font-weight:500">${cat.name}</span></div>` : ''}
+        <div class="row-between"><span class="t-small">Método</span><span style="font-weight:500">${e.payment_method === 'card' ? 'Tarjeta' : e.payment_method === 'cash' ? 'Efectivo' : 'Transferencia'}</span></div>
+        ${card ? `<div class="row-between"><span class="t-small">Tarjeta</span><span style="font-weight:500">${card.name}</span></div>` : ''}
+        ${e.owner ? `<div class="row-between"><span class="t-small">Dueño</span><span style="font-weight:500">${e.owner}</span></div>` : ''}
       </div>
-      <button class="btn btn-danger btn-block mt-5" id="f-del">Eliminar gasto</button>
+
+      <button class="btn btn-ghost btn-block btn-sm" id="f-del" style="color:var(--clay)">Eliminar gasto</button>
     </div>
   `, {
     onMount: ({ root: r, close }) => {

@@ -20,26 +20,43 @@ export async function cardsView(root) {
       if (e.card_id) spentByCard[e.card_id] = (spentByCard[e.card_id] || 0) + +e.amount;
     });
 
+    const totalLimit = cards.reduce((s, c) => s + +c.credit_limit, 0);
+    const totalSpent = Object.values(spentByCard).reduce((s, v) => s + v, 0);
+
     root.innerHTML = `
-      <section class="page-enter px-5 pt-6">
-        <header class="mb-5 flex items-center justify-between">
+      <section class="page-enter page">
+        <div class="page-header row-between">
           <div>
-            <h1 class="heading-xl">Tarjetas</h1>
-            <p class="text-sm text-stone mt-1">${cards.length} registrada${cards.length === 1 ? '' : 's'}</p>
+            <span class="t-eyebrow">Cartera</span>
+            <h1 class="t-display" style="margin-top:4px">Tarjetas</h1>
+            <div class="t-small" style="margin-top:4px">${cards.length} activa${cards.length === 1 ? '' : 's'}</div>
           </div>
-          <button class="btn btn-primary" id="add-card">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <button class="btn btn-ink btn-sm" id="add-card">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
             Agregar
           </button>
-        </header>
-
-        <div id="cards-container">
-          ${cardList(cards, { spentByCard })}
         </div>
+
+        ${cards.length ? `
+          <div class="card card-tinted" style="margin-bottom:24px">
+            <div class="grid-2">
+              <div class="stat-block">
+                <div class="stat-label">Total gastado</div>
+                <div class="stat-value t-mono" style="font-size:22px">${mxn(totalSpent)}</div>
+              </div>
+              <div class="stat-block">
+                <div class="stat-label">Límite combinado</div>
+                <div class="stat-value t-mono" style="font-size:22px;color:var(--ink-60)">${mxn(totalLimit)}</div>
+              </div>
+            </div>
+          </div>
+        ` : ''}
+
+        <div id="cards-container">${cardList(cards, { spentByCard })}</div>
       </section>
 
-      <button class="fab" id="fab">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <button class="fab" id="fab" aria-label="Nueva tarjeta">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
     `;
 
@@ -57,27 +74,30 @@ export async function cardsView(root) {
   }
 
   render();
-
   return () => unsubscribe();
 }
 
 function openCardForm(existing = null) {
   const isEdit = !!existing;
   const colors = [
-    { v: '#0075de', label: 'Azul' },
-    { v: '#f64932', label: 'Coral' },
-    { v: '#ffb110', label: 'Marigold' },
-    { v: '#62aef0', label: 'Cielo' },
-    { v: '#02093a', label: 'Noche' },
-    { v: '#b18164', label: 'Mocha' }
+    { v: '#c5471e', label: 'Terracota' },
+    { v: '#2e4a6b', label: 'Egeo' },
+    { v: '#4a5d3a', label: 'Oliva' },
+    { v: '#6b3e5e', label: 'Ciruela' },
+    { v: '#d4a017', label: 'Ocre' },
+    { v: '#1a1814', label: 'Tinta' }
   ];
 
   modal(`
+    <div class="modal-handle"></div>
     <div class="modal-header">
-      <h3 class="heading-md">${isEdit ? 'Editar' : 'Nueva'} tarjeta</h3>
-      <button class="btn btn-text btn-sm" data-act="close">Cancelar</button>
+      <div>
+        <span class="t-eyebrow">${isEdit ? 'Editar' : 'Nueva'}</span>
+        <h3 class="t-display-sm" style="margin-top:2px">${isEdit ? 'Tarjeta' : 'Tarjeta de crédito'}</h3>
+      </div>
+      <button class="btn btn-ghost btn-sm" data-act="close">Cerrar</button>
     </div>
-    <div class="modal-body space-y-3">
+    <div class="modal-body stack">
       <div>
         <label class="label">Dueño</label>
         <div class="chip-group" data-group="owner">
@@ -91,9 +111,9 @@ function openCardForm(existing = null) {
       </div>
       <div>
         <label class="label">Banco</label>
-        <input class="input" id="f-bank" placeholder="Ej. BBVA" value="${existing?.bank || ''}" />
+        <input class="input" id="f-bank" placeholder="Ej. BBVA, Banamex..." value="${existing?.bank || ''}" />
       </div>
-      <div class="grid grid-cols-2 gap-3">
+      <div class="grid-2">
         <div>
           <label class="label">Día de corte</label>
           <input class="input" type="number" min="1" max="31" id="f-cutoff" value="${existing?.cutoff_day || 15}" />
@@ -110,11 +130,16 @@ function openCardForm(existing = null) {
       <div>
         <label class="label">Color</label>
         <div class="chip-group" data-group="color">
-          ${colors.map((c, i) => `<button type="button" class="chip ${(existing?.color || colors[0].v) === c.v ? 'active' : ''}" data-val="${c.v}" style="${i === 0 ? 'background:'+c.v+';color:#fff' : ''}">${c.label}</button>`).join('')}
+          ${colors.map((c) => `
+            <button type="button" class="chip ${(existing?.color || colors[0].v) === c.v ? 'active' : ''}" data-val="${c.v}" style="${(existing?.color || colors[0].v) === c.v ? `background:${c.v};color:#fff;border-color:${c.v}` : ''}">
+              <span style="width:10px;height:10px;border-radius:50%;background:${c.v};display:inline-block"></span>
+              ${c.label}
+            </button>
+          `).join('')}
         </div>
       </div>
-      <button class="btn btn-primary btn-block btn-lg" id="f-save">${isEdit ? 'Guardar cambios' : 'Crear tarjeta'}</button>
-      ${isEdit ? `<button class="btn btn-text btn-block btn-sm text-coral" id="f-delete">Eliminar tarjeta</button>` : ''}
+      <button class="btn btn-ink btn-block btn-lg" id="f-save">${isEdit ? 'Guardar cambios' : 'Crear tarjeta'}</button>
+      ${isEdit ? `<button class="btn btn-ghost btn-block btn-sm" id="f-delete" style="color:var(--clay)">Eliminar tarjeta</button>` : ''}
     </div>
   `, {
     onMount: ({ root: r, close }) => {
@@ -133,8 +158,16 @@ function openCardForm(existing = null) {
         const b = e.target.closest('[data-val]');
         if (!b) return;
         color = b.dataset.val;
-        r.querySelectorAll('[data-group="color"] .chip').forEach((c) => c.classList.remove('active'));
+        r.querySelectorAll('[data-group="color"] .chip').forEach((c) => {
+          c.classList.remove('active');
+          c.style.background = '';
+          c.style.color = '';
+          c.style.borderColor = '';
+        });
         b.classList.add('active');
+        b.style.background = color;
+        b.style.color = '#fff';
+        b.style.borderColor = color;
       });
 
       r.querySelector('[data-act="close"]').onclick = close;
@@ -184,57 +217,61 @@ function openCardDetail(card) {
   const { expenses, payments } = getState();
   const cardExpenses = expenses.filter((e) => e.card_id === card.id).slice(0, 20);
   const cardPayments = payments.filter((p) => p.card_id === card.id).slice(0, 10);
+  const disponible = Math.max(0, +card.credit_limit - cardExpenses.reduce((s, e) => s + +e.amount, 0));
 
   modal(`
+    <div class="modal-handle"></div>
     <div class="modal-header">
       <div>
-        <h3 class="heading-md">${card.name}</h3>
-        <p class="text-sm text-stone">${card.bank || ''} · ${card.owner}</p>
+        <span class="t-eyebrow">${card.bank || 'Tarjeta'}</span>
+        <h3 class="t-display-sm" style="margin-top:2px">${card.name}</h3>
       </div>
-      <button class="btn btn-text btn-sm" data-act="close">✕</button>
+      <button class="btn btn-ghost btn-sm" data-act="close">✕</button>
     </div>
-    <div class="modal-body">
-      <div class="card-tight card mb-3">
-        <div class="grid grid-cols-2 gap-3 text-sm">
-          <div>
-            <div class="text-xs text-stone">Día de corte</div>
-            <div class="font-semibold">${card.cutoff_day}</div>
-          </div>
-          <div>
-            <div class="text-xs text-stone">Día de pago</div>
-            <div class="font-semibold">${card.payment_day}</div>
-          </div>
-          <div>
-            <div class="text-xs text-stone">Límite</div>
-            <div class="font-semibold">${mxn(card.credit_limit)}</div>
-          </div>
-          <div>
-            <div class="text-xs text-stone">Disponible</div>
-            <div class="font-semibold">${mxn(Math.max(0, +card.credit_limit - cardExpenses.reduce((s, e) => s + +e.amount, 0)))}</div>
+    <div class="modal-body stack">
+      <div class="hero-stat grain">
+        <div class="content">
+          <div class="stat-label">Disponible</div>
+          <div class="stat-value"><span class="unit">$</span>${mxn(disponible).replace('$','').trim()}</div>
+          <div style="margin-top:8px;font-family:var(--f-mono);font-size:10.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-60)">
+            de ${mxn(card.credit_limit)}
           </div>
         </div>
       </div>
 
-      <div class="flex gap-2 mb-4">
-        <button class="btn btn-primary btn-block" id="pay-btn">Registrar pago</button>
-        <button class="btn btn-text btn-block" id="edit-btn">Editar</button>
+      <div class="grid-2">
+        <div class="card card-tinted">
+          <div class="stat-label">Día de corte</div>
+          <div class="t-display-sm" style="margin-top:4px;font-family:var(--f-display);font-weight:500;font-size:28px">${card.cutoff_day}</div>
+        </div>
+        <div class="card card-tinted">
+          <div class="stat-label">Día de pago</div>
+          <div class="t-display-sm" style="margin-top:4px;font-family:var(--f-display);font-weight:500;font-size:28px">${card.payment_day}</div>
+        </div>
       </div>
 
-      <div class="section-title">Historial de pagos</div>
-      ${cardPayments.length ? cardPayments.map((p) => `
-        <div class="list-item">
-          <div class="flex-1">
-            <div class="font-medium">${fechaCorta(p.due_date)} · ${p.year}/${String(p.month).padStart(2,'0')}</div>
-            <div class="text-xs text-stone">${p.notes || '—'}</div>
-          </div>
-          <div class="text-right">
-            <div class="font-semibold">${mxn(p.amount)}</div>
-            <span class="pill ${p.status === 'paid' ? 'pill-sky' : p.status === 'partial' ? 'pill-marigold' : 'pill-coral'}" style="padding:1px 8px;font-size:10px">
-              ${p.status === 'paid' ? 'Pagado' : p.status === 'partial' ? 'Parcial' : 'Pendiente'}
-            </span>
-          </div>
+      <div class="row" style="gap:8px">
+        <button class="btn btn-ink btn-block" id="pay-btn">Registrar pago</button>
+        <button class="btn btn-ghost btn-block" id="edit-btn">Editar</button>
+      </div>
+
+      <div>
+        <div class="section-header">
+          <span class="t-eyebrow">Pagos recientes</span>
         </div>
-      `).join('') : '<div class="empty-state text-sm">Sin pagos registrados</div>'}
+        ${cardPayments.length ? `<div class="list">${cardPayments.map((p) => `
+          <div class="list-row">
+            <div style="flex:1">
+              <div class="name">${fechaCorta(p.due_date)}</div>
+              <div class="meta">${p.month}/${p.year} · ${p.notes || '—'}</div>
+            </div>
+            <div class="right">
+              <div class="amount">${mxn(p.amount)}</div>
+              <div style="margin-top:4px"><span class="pill ${p.status === 'paid' ? 'pill-haziel' : p.status === 'partial' ? 'pill-ochre' : 'pill-clay'}">${p.status === 'paid' ? 'Pagado' : p.status === 'partial' ? 'Parcial' : 'Pendiente'}</span></div>
+            </div>
+          </div>
+        `).join('')}</div>` : `<div class="empty" style="padding:24px">Sin pagos aún</div>`}
+      </div>
     </div>
   `, {
     onMount: ({ root: r, close }) => {

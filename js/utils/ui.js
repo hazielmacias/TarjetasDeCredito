@@ -47,12 +47,18 @@ export function modal(contentHTML, { onMount, dismissible = true } = {}) {
 export function confirm({ title = '¿Estás seguro?', message = '', confirmText = 'Confirmar', cancelText = 'Cancelar', danger = false } = {}) {
   return new Promise((resolve) => {
     modal(`
-      <div class="p-6">
-        <h3 class="heading-lg mb-2">${title}</h3>
-        <p class="text-graphite mb-5">${message}</p>
-        <div class="flex gap-2 justify-end">
-          <button class="btn btn-text" data-act="cancel">${cancelText}</button>
-          <button class="btn ${danger ? 'btn-danger' : 'btn-primary'}" data-act="ok">${confirmText}</button>
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <div>
+          <span class="t-eyebrow">${danger ? 'Atención' : 'Confirmar'}</span>
+          <h3 class="t-display-sm" style="margin-top:2px">${title}</h3>
+        </div>
+      </div>
+      <div class="modal-body stack">
+        ${message ? `<p class="t-serif-body">${message}</p>` : ''}
+        <div class="row" style="gap:8px">
+          <button class="btn btn-ghost btn-block" data-act="cancel">${cancelText}</button>
+          <button class="btn ${danger ? '' : 'btn-ink'} btn-block" data-act="ok" style="${danger ? 'background:var(--clay);color:var(--paper-soft)' : ''}">${confirmText}</button>
         </div>
       </div>
     `, {

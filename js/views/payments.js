@@ -13,40 +13,56 @@ export async function paymentsView(root) {
     const { payments, cards } = state;
     const sorted = [...payments].sort((a, b) => new Date(b.due_date) - new Date(a.due_date));
 
-    root.innerHTML = `
-      <section class="page-enter px-5 pt-6">
-        <header class="mb-5 flex items-center justify-between">
-          <div>
-            <h1 class="heading-xl">Pagos</h1>
-            <p class="text-sm text-stone mt-1">Historial de pagos a tarjetas</p>
-          </div>
-        </header>
+    const pending = sorted.filter((p) => p.status !== 'paid').length;
+    const totalPaid = sorted.filter((p) => p.status === 'paid').reduce((s, p) => s + +p.amount, 0);
 
-        ${sorted.length ? `<div class="space-y-2">
+    root.innerHTML = `
+      <section class="page-enter page">
+        <div class="page-header row-between">
+          <div>
+            <span class="t-eyebrow">Compromisos</span>
+            <h1 class="t-display" style="margin-top:4px">Pagos</h1>
+          </div>
+          <button class="btn btn-ink btn-sm" id="add-pay">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Registrar
+          </button>
+        </div>
+
+        ${sorted.length ? `
+          <div class="grid-2" style="margin-bottom:24px">
+            <div class="card card-tinted">
+              <div class="stat-label">Pendientes</div>
+              <div class="stat-value t-mono" style="font-size:32px">${pending}</div>
+            </div>
+            <div class="card card-tinted">
+              <div class="stat-label">Pagado</div>
+              <div class="stat-value t-mono" style="font-size:22px">${mxn(totalPaid)}</div>
+            </div>
+          </div>
+        ` : ''}
+
+        ${sorted.length ? `<div class="list">
           ${sorted.map((p) => {
             const card = cards.find((c) => c.id === p.card_id);
             if (!card) return '';
-            const tono = p.status === 'paid' ? 'sky' : p.status === 'partial' ? 'marigold' : 'coral';
+            const tono = p.status === 'paid' ? 'pill-haziel' : p.status === 'partial' ? 'pill-ochre' : 'pill-clay';
             const label = p.status === 'paid' ? 'Pagado' : p.status === 'partial' ? 'Parcial' : 'Pendiente';
             return `
-              <div class="list-item" data-id="${p.id}">
-                <div class="w-10 h-10 rounded-card flex items-center justify-center" style="background:${card.color}22">
-                  <span class="font-semibold text-sm" style="color:${card.color}">${card.name.slice(0, 2).toUpperCase()}</span>
+              <div class="list-row" data-id="${p.id}">
+                <div class="avatar" style="background:${card.color}">${card.name.slice(0, 2).toUpperCase()}</div>
+                <div style="flex:1;min-width:0">
+                  <div class="name">${card.name}</div>
+                  <div class="meta">${fechaCorta(p.due_date)} · ${p.month}/${p.year}</div>
                 </div>
-                <div class="flex-1 min-w-0">
-                  <div class="font-medium truncate">${card.name}</div>
-                  <div class="text-xs text-stone">Vence ${fechaCorta(p.due_date)} · ${p.month}/${p.year}</div>
-                </div>
-                <div class="text-right">
-                  <div class="font-semibold text-balance">${mxn(p.amount)}</div>
-                  <span class="pill pill-${tono}" style="padding:1px 8px;font-size:10px">${label}</span>
+                <div class="right">
+                  <div class="amount">${mxn(p.amount)}</div>
+                  <div style="margin-top:4px"><span class="pill ${tono}">${label}</span></div>
                 </div>
               </div>
             `;
           }).join('')}
-        </div>` : `<div class="empty-state">Sin pagos registrados</div>`}
-
-        <button class="btn btn-primary btn-block btn-lg mt-6" id="add-pay">+ Registrar pago</button>
+        </div>` : `<div class="empty">Sin pagos registrados aún.</div>`}
       </section>
     `;
 
@@ -71,9 +87,9 @@ export async function paymentFormView(root, qs = {}) {
 
   if (!cards.length) {
     root.innerHTML = `
-      <section class="page-enter px-5 pt-6">
-        <button class="btn btn-text btn-sm mb-4" id="back">← Volver</button>
-        <div class="empty-state">Primero agrega una tarjeta</div>
+      <section class="page-enter page">
+        <button class="btn-link btn-link-back btn-sm" id="back" style="border:none;cursor:pointer;background:transparent;padding:8px 0">Volver</button>
+        <div class="empty" style="margin-top:80px">Primero agrega una tarjeta</div>
       </section>
     `;
     root.querySelector('#back').onclick = () => history.back();
@@ -81,20 +97,23 @@ export async function paymentFormView(root, qs = {}) {
   }
 
   root.innerHTML = `
-    <section class="page-enter px-5 pt-6">
-      <header class="mb-5 flex items-center justify-between">
-        <button class="btn btn-text btn-sm" id="back">← Volver</button>
-        <h1 class="heading-md">Registrar pago</h1>
-        <span></span>
-      </header>
+    <section class="page-enter page">
+      <div class="page-header with-back">
+        <div class="row" style="justify-content:space-between">
+          <button class="btn-link btn-link-back btn-sm" id="back" style="border:none;cursor:pointer;background:transparent">Volver</button>
+          <span class="t-eyebrow-mono">Nuevo</span>
+          <span style="width:50px"></span>
+        </div>
+        <h1 class="t-display" style="margin-top:12px">Pago</h1>
+      </div>
 
-      <div class="space-y-4">
+      <div class="stack-loose">
         <div>
           <label class="label">Tarjeta</label>
           <div class="chip-group" id="f-cards">
             ${cards.map((c) => `
-              <button type="button" class="chip ${c.id === preselectedCardId ? 'active' : ''}" data-id="${c.id}" style="border-color:${c.color}">
-                <span class="w-2 h-2 rounded-full" style="background:${c.color}"></span>
+              <button type="button" class="chip ${c.id === preselectedCardId ? 'active' : ''}" data-id="${c.id}">
+                <span style="width:8px;height:8px;border-radius:50%;background:${c.color};display:inline-block"></span>
                 ${c.name}
               </button>
             `).join('')}
@@ -103,7 +122,7 @@ export async function paymentFormView(root, qs = {}) {
 
         <div>
           <label class="label">Monto</label>
-          <input class="input" type="number" step="0.01" min="0" id="f-amount" autofocus inputmode="decimal" />
+          <input class="input t-mono-lg" type="number" step="0.01" min="0" id="f-amount" autofocus inputmode="decimal" style="font-size:32px" />
         </div>
 
         <div>
@@ -125,7 +144,7 @@ export async function paymentFormView(root, qs = {}) {
           <input class="input" id="f-notes" placeholder="Pago del mes..." />
         </div>
 
-        <button class="btn btn-primary btn-block btn-lg" id="f-save">Guardar pago</button>
+        <button class="btn btn-ink btn-block btn-lg" id="f-save">Guardar pago</button>
       </div>
     </section>
   `;
@@ -154,7 +173,6 @@ export async function paymentFormView(root, qs = {}) {
   bindGroup(root.querySelector('#f-cards'), 'card', 'id');
   bindGroup(root.querySelector('#f-status'), 'status', 'val');
 
-  // Set default due date
   const card = cards.find((c) => c.id === selected.card);
   if (card) {
     const due = new Date();
@@ -203,35 +221,46 @@ function openPaymentDetail(p) {
   const card = cards.find((c) => c.id === p.card_id);
 
   modal(`
+    <div class="modal-handle"></div>
     <div class="modal-header">
-      <h3 class="heading-md">Detalle del pago</h3>
-      <button class="btn btn-text btn-sm" data-act="close">✕</button>
+      <div>
+        <span class="t-eyebrow">Pago</span>
+        <h3 class="t-display-sm" style="margin-top:2px">${card?.name || 'Tarjeta'}</h3>
+      </div>
+      <button class="btn btn-ghost btn-sm" data-act="close">✕</button>
     </div>
-    <div class="modal-body">
-      <div class="text-center mb-4">
-        <div class="kpi-value">${mxn(p.amount)}</div>
-        <div class="text-stone text-sm mt-1">${card?.name || '—'}</div>
+    <div class="modal-body stack">
+      <div class="hero-stat grain">
+        <div class="content">
+          <div class="stat-label">Monto</div>
+          <div class="stat-value"><span class="unit">$</span>${mxn(p.amount).replace('$','').trim()}</div>
+          <div style="margin-top:6px;font-family:var(--f-mono);font-size:10.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-60)">${fechaCorta(p.due_date)}</div>
+        </div>
       </div>
-      <div class="space-y-2 text-sm">
-        <div class="flex justify-between"><span class="text-stone">Vence</span><span>${fechaCorta(p.due_date)}</span></div>
-        <div class="flex justify-between"><span class="text-stone">Estado</span><span>${p.status}</span></div>
-        ${p.paid_date ? `<div class="flex justify-between"><span class="text-stone">Pagado el</span><span>${fechaCorta(p.paid_date)}</span></div>` : ''}
-        ${p.notes ? `<div class="flex justify-between"><span class="text-stone">Notas</span><span>${p.notes}</span></div>` : ''}
+
+      <div class="card stack-tight">
+        <div class="row-between"><span class="t-small">Estado</span><span style="font-weight:500">${p.status === 'paid' ? 'Pagado' : p.status === 'partial' ? 'Parcial' : 'Pendiente'}</span></div>
+        ${p.paid_date ? `<div class="row-between"><span class="t-small">Pagado el</span><span style="font-weight:500">${fechaCorta(p.paid_date)}</span></div>` : ''}
+        ${p.notes ? `<div class="row-between"><span class="t-small">Notas</span><span style="font-weight:500">${p.notes}</span></div>` : ''}
       </div>
-      <div class="grid grid-cols-2 gap-2 mt-5">
-        <button class="btn btn-text btn-block" id="f-paid">Marcar pagado</button>
-        <button class="btn btn-danger btn-block" id="f-del">Eliminar</button>
+
+      <div class="row" style="gap:8px">
+        ${p.status !== 'paid' ? `<button class="btn btn-ink btn-block" id="f-paid">Marcar pagado</button>` : '<div style="flex:1"></div>'}
+        <button class="btn btn-ghost btn-block" id="f-del" style="color:var(--clay)">Eliminar</button>
       </div>
     </div>
   `, {
     onMount: ({ root: r, close }) => {
       r.querySelector('[data-act="close"]').onclick = close;
-      r.querySelector('#f-paid').onclick = async () => {
-        await updatePayment(p.id, { status: 'paid', paid_date: new Date().toISOString().slice(0, 10) });
-        await refreshAll();
-        close();
-        toast('Marcado como pagado');
-      };
+      const paidBtn = r.querySelector('#f-paid');
+      if (paidBtn) {
+        paidBtn.onclick = async () => {
+          await updatePayment(p.id, { status: 'paid', paid_date: new Date().toISOString().slice(0, 10) });
+          await refreshAll();
+          close();
+          toast('Marcado como pagado');
+        };
+      }
       r.querySelector('#f-del').onclick = async () => {
         const ok = await confirm({ title: '¿Eliminar pago?', danger: true });
         if (!ok) return;

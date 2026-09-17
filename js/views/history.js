@@ -19,49 +19,49 @@ export async function historyView(root) {
     if (!years.includes(year)) years.unshift(year);
 
     root.innerHTML = `
-      <section class="page-enter px-5 pt-6">
-        <header class="mb-5">
-          <button class="btn btn-text btn-sm mb-2" id="back">← Volver</button>
-          <h1 class="heading-xl">Historial</h1>
-        </header>
+      <section class="page-enter page">
+        <div class="page-header with-back">
+          <button class="btn-link btn-link-back btn-sm" id="back" style="border:none;cursor:pointer;background:transparent;padding:0">Volver</button>
+          <h1 class="t-display" style="margin-top:12px">Historial</h1>
+        </div>
 
-        <div class="card mb-5">
-          <div class="flex items-center gap-2">
-            <button class="btn btn-text" id="prev-month">←</button>
-            <div class="flex-1 text-center">
-              <div class="heading-md">${mesNombre(month)} ${year}</div>
-            </div>
-            <button class="btn btn-text" id="next-month">→</button>
+        <div class="card" style="margin-bottom:24px">
+          <div class="row" style="justify-content:space-between;align-items:center">
+            <button class="btn btn-ghost btn-sm" id="prev-month" style="width:36px;padding:8px">←</button>
+            <div class="t-display-sm" style="font-family:var(--f-display);font-weight:500">${mesNombre(month)} ${year}</div>
+            <button class="btn btn-ghost btn-sm" id="next-month" style="width:36px;padding:8px">→</button>
           </div>
-          <div class="flex gap-2 mt-3 justify-center">
-            <select class="select" id="sel-month" style="max-width:140px">
+          <div class="grid-2" style="margin-top:16px">
+            <select class="select" id="sel-month">
               ${[1,2,3,4,5,6,7,8,9,10,11,12].map((m) => `<option value="${m}" ${m === month ? 'selected' : ''}>${mesNombre(m)}</option>`).join('')}
             </select>
-            <select class="select" id="sel-year" style="max-width:100px">
+            <select class="select" id="sel-year">
               ${years.map((y) => `<option value="${y}" ${y === year ? 'selected' : ''}>${y}</option>`).join('')}
             </select>
           </div>
         </div>
 
-        <div class="card mb-5">
-          <div class="grid grid-cols-3 gap-3 text-center">
-            <div>
-              <div class="text-xs text-stone">Gastos</div>
-              <div class="font-semibold text-balance">${monthExpenses.length}</div>
-            </div>
-            <div>
-              <div class="text-xs text-stone">Total</div>
-              <div class="font-semibold text-balance">${mxn(total)}</div>
-            </div>
-            <div>
-              <div class="text-xs text-stone">Pagos</div>
-              <div class="font-semibold text-balance">${monthPayments.length}</div>
-            </div>
+        <div class="grid-3" style="margin-bottom:32px">
+          <div class="card card-tinted">
+            <div class="stat-label">Movimientos</div>
+            <div class="stat-value t-mono" style="font-size:24px;margin-top:6px">${monthExpenses.length}</div>
+          </div>
+          <div class="card card-tinted">
+            <div class="stat-label">Total</div>
+            <div class="stat-value t-mono" style="font-size:18px;margin-top:6px">${mxn(total)}</div>
+          </div>
+          <div class="card card-tinted">
+            <div class="stat-label">Pagos</div>
+            <div class="stat-value t-mono" style="font-size:24px;margin-top:6px">${monthPayments.length}</div>
           </div>
         </div>
 
-        <div class="section-title">Gastos del mes</div>
-        ${expenseList(monthExpenses, { categories, cards, emptyText: 'Sin gastos en este mes' })}
+        <div>
+          <div class="section-header">
+            <span class="t-eyebrow">Gastos del mes</span>
+          </div>
+          ${expenseList(monthExpenses, { categories, cards, emptyText: 'Sin gastos en este mes.' })}
+        </div>
       </section>
     `;
 

@@ -16,7 +16,7 @@ import { signInAnonymously, getSession } from './supabase.js';
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
     try {
-      await navigator.serviceWorker.register('/service-worker.js');
+      await navigator.serviceWorker.register('./service-worker.js', { scope: './' });
     } catch (e) {
       console.warn('SW no registrado:', e);
     }

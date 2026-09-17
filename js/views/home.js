@@ -1,13 +1,10 @@
 import { getState, subscribe } from '../store.js';
-import { mxn, mesNombre, proximaFechaPorDia, diffDias } from '../utils/format.js';
+import { mxn, mesNombre, diffDias } from '../utils/format.js';
 import { renderBottomNav } from '../components/bottom-nav.js';
 import { kpiGrid } from '../components/kpi-card.js';
 import { cardItem } from '../components/card-item.js';
 import { expenseList } from '../components/expense-item.js';
 import { navigate } from '../router.js';
-import { modal } from '../utils/ui.js';
-import { setMonth } from '../store.js';
-import { refreshAll } from '../api/sync.js';
 
 export async function homeView(root) {
   let state = getState();
@@ -17,7 +14,7 @@ export async function homeView(root) {
   });
 
   function render() {
-    const { room, cards, expenses, categories, payments, currentMonth } = state;
+    const { room, cards, expenses, payments, currentMonth } = state;
     const { year, month } = currentMonth;
 
     const monthExpenses = expenses.filter((e) => e.year === year && e.month === month);
@@ -33,52 +30,77 @@ export async function homeView(root) {
       .map((p) => ({ ...p, card: cards.find((c) => c.id === p.card_id) }))
       .filter((p) => p.card)
       .sort((a, b) => new Date(a.due_date) - new Date(b.due_date))
-      .slice(0, 2);
+      .slice(0, 3);
 
     const disponibles = cards.reduce((acc, c) => acc + Math.max(0, +c.credit_limit - (spentByCard[c.id] || 0)), 0);
 
+    const ownerName = room?.owner_name || 'Haziel';
+
     root.innerHTML = `
-      <section class="page-enter px-5 pt-6">
-        <header class="mb-6">
-          <div class="flex items-center justify-between mb-1">
-            <span class="text-xs text-stone">Hola,</span>
-            <span class="text-xs text-stone">${room?.name || 'Nuestras Finanzas'}</span>
+      <section class="page-enter page">
+        <div class="page-header">
+          <div class="row-between" style="margin-bottom:32px">
+            <div class="brand-mark"><span class="dot"></span>N · F</div>
+            <span class="folio">Folio · ${String(new Date().getDate()).padStart(2,'0')}.${String(month).padStart(2,'0')}</span>
           </div>
-          <h1 class="heading-xl">${mesNombre(month)} ${year}</h1>
-          <button id="month-toggle" class="text-sm text-notion-blue mt-1">Ver historial →</button>
-        </header>
 
-        ${kpiGrid([
-          { label: 'Gastado este mes', value: mxn(totalMonth), accent: 'blue' },
-          { label: 'Disponible total', value: mxn(disponibles), accent: 'sky' }
-        ])}
+          <div style="margin-bottom:6px">
+            <span class="t-eyebrow">Hola, ${ownerName}</span>
+          </div>
 
-        <div class="mt-4">
-          ${kpiGrid([
-            { label: 'Tarjetas', value: cards.length, accent: 'marigold' },
-            { label: 'Gastos', value: monthExpenses.length, accent: 'coral' }
-          ])}
+          <h1 class="t-display-xl">
+            <span class="t-display-italic" style="color:var(--ink-60)">${mesNombre(month)}</span><br>
+            ${year}.
+          </h1>
+
+          <p class="t-serif-body" style="margin-top:16px">
+            <span class="hl-pill">${monthExpenses.length}</span> movimientos este mes —
+            ${totalMonth === 0 ? 'un lienzo en blanco.' : `acumulando ${mxn(totalMonth)}.`}
+          </p>
         </div>
 
+        <div class="hero-stat grain" style="margin-bottom:24px">
+          <div class="content">
+            <div class="row-between" style="margin-bottom:8px">
+              <div class="t-eyebrow-mono">Gastado este mes</div>
+              <span class="pill pill-ochre">${monthExpenses.length} mov.</span>
+            </div>
+            <div class="stat-value">
+              <span class="unit">$</span>${formatNum(totalMonth)}
+            </div>
+            <div class="row-between" style="margin-top:14px;font-family:var(--f-mono);font-size:10.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-60)">
+              <span>Disponible</span>
+              <span style="font-family:var(--f-mono);font-weight:500;color:var(--ink)">${mxn(disponibles)}</span>
+            </div>
+          </div>
+        </div>
+
+        ${kpiGrid([
+          { label: 'Tarjetas', value: cards.length, accent: 'ink' },
+          { label: 'Pagos pend.', value: proximosPagos.length, accent: 'ink' }
+        ])}
+
         ${proximosPagos.length ? `
-          <div class="mt-6">
-            <div class="section-title">Próximos pagos</div>
-            <div class="space-y-2">
+          <div style="margin-top:32px">
+            <div class="section-header">
+              <span class="t-eyebrow">Próximos pagos</span>
+              <button class="btn-link btn-sm" id="go-payments" style="border:none;cursor:pointer">Ver todos</button>
+            </div>
+            <div class="list">
               ${proximosPagos.map((p) => {
                 const dias = diffDias(p.due_date);
-                const tono = dias <= 1 ? 'coral' : dias <= 3 ? 'marigold' : 'sky';
+                const tono = dias <= 1 ? 'pill-clay' : dias <= 3 ? 'pill-ochre' : '';
+                const fecha = dias <= 0 ? 'Vence hoy' : dias === 1 ? 'Mañana' : `en ${dias} días`;
                 return `
-                  <div class="list-item" data-id="${p.id}">
-                    <div class="w-10 h-10 rounded-card flex items-center justify-center" style="background:${p.card.color}22">
-                      <span class="font-semibold text-sm" style="color:${p.card.color}">${p.card.name.slice(0, 2).toUpperCase()}</span>
+                  <div class="list-row" data-id="${p.id}">
+                    <div class="avatar" style="background:${p.card.color}">${p.card.name.slice(0, 2).toUpperCase()}</div>
+                    <div style="flex:1;min-width:0">
+                      <div class="name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.card.name}</div>
+                      <div class="meta">${p.card.bank || ''} · ${fecha}</div>
                     </div>
-                    <div class="flex-1 min-w-0">
-                      <div class="font-medium truncate">${p.card.name}</div>
-                      <div class="text-xs text-stone">${p.card.bank || '—'} · ${dias <= 0 ? 'Vence hoy' : dias === 1 ? 'Mañana' : `en ${dias} días`}</div>
-                    </div>
-                    <div class="text-right">
-                      <div class="font-semibold text-balance">${mxn(p.amount)}</div>
-                      <span class="pill pill-${tono}" style="padding:1px 8px;font-size:10px">${p.status === 'partial' ? 'Parcial' : 'Pendiente'}</span>
+                    <div class="right">
+                      <div class="amount">${mxn(p.amount)}</div>
+                      <div style="margin-top:4px"><span class="pill ${tono}">${p.status === 'partial' ? 'Parcial' : 'Pendiente'}</span></div>
                     </div>
                   </div>
                 `;
@@ -87,41 +109,66 @@ export async function homeView(root) {
           </div>
         ` : ''}
 
-        <div class="mt-6">
-          <div class="section-title">Tarjetas</div>
-          <div class="space-y-3">
-            ${cards.slice(0, 3).map((c) => cardItem(c, { spent: spentByCard[c.id] || 0 })).join('')}
-            ${cards.length > 3 ? `<button class="btn btn-text btn-block" id="see-all-cards">Ver todas (${cards.length})</button>` : ''}
-            ${!cards.length ? `<div class="empty-state">Sin tarjetas todavía</div>` : ''}
+        ${cards.length ? `
+          <div style="margin-top:32px">
+            <div class="section-header">
+              <span class="t-eyebrow">Tarjetas</span>
+              <button class="btn-link btn-sm" id="see-all-cards" style="border:none;cursor:pointer">${cards.length > 3 ? `Ver todas (${cards.length})` : 'Administrar'}</button>
+            </div>
+            <div class="stack">
+              ${cards.slice(0, 3).map((c) => cardItem(c, { spent: spentByCard[c.id] || 0 })).join('')}
+            </div>
           </div>
-        </div>
+        ` : ''}
 
-        <div class="mt-6">
-          <div class="section-title">Últimos gastos</div>
-          ${expenseList(monthExpenses.slice(0, 5), { categories, cards })}
-        </div>
+        ${monthExpenses.length ? `
+          <div style="margin-top:32px">
+            <div class="section-header">
+              <span class="t-eyebrow">Últimos movimientos</span>
+              <button class="btn-link btn-sm" id="see-all-exp" style="border:none;cursor:pointer">Ver todos</button>
+            </div>
+            ${expenseList(monthExpenses.slice(0, 5), { categories, cards })}
+          </div>
+        ` : ''}
+
+        ${!cards.length ? `
+          <div class="empty" style="margin-top:32px">
+            Comienza por aquí →<br>agrega tu primera tarjeta.
+          </div>
+        ` : ''}
       </section>
 
-      <button class="fab" id="fab">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <button class="fab" id="fab" aria-label="Nuevo gasto">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
         </svg>
       </button>
     `;
 
     root.appendChild(renderBottomNav());
 
-    root.querySelector('#fab').addEventListener('click', () => {
-      navigate('/expenses/new');
+    root.querySelector('#fab').addEventListener('click', () => navigate('/expenses/new'));
+    const goAll = root.querySelector('#see-all-cards');
+    if (goAll) goAll.onclick = () => navigate('/cards');
+    const goExp = root.querySelector('#see-all-exp');
+    if (goExp) goExp.onclick = () => navigate('/expenses');
+    const goPay = root.querySelector('#go-payments');
+    if (goPay) goPay.onclick = () => navigate('/payments');
+    root.querySelectorAll('[data-id]').forEach((el) => {
+      if (el.closest('button')) return;
+      el.style.cursor = 'pointer';
+      el.onclick = () => {
+        const id = el.dataset.id;
+        const p = payments.find((x) => x.id === id);
+        if (p) navigate(`/payments/new?card=${p.card_id}`);
+      };
     });
-    root.querySelector('#month-toggle').addEventListener('click', () => {
-      navigate('/history');
-    });
-    const seeAll = root.querySelector('#see-all-cards');
-    if (seeAll) seeAll.onclick = () => navigate('/cards');
   }
 
   render();
-
   return () => unsubscribe();
+}
+
+function formatNum(n) {
+  return mxn(n).replace('$', '').trim();
 }

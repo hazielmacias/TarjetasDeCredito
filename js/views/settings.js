@@ -17,22 +17,25 @@ export async function settingsView(root) {
     const { room, cards, expenses, payments, categories } = state;
 
     root.innerHTML = `
-      <section class="page-enter px-5 pt-6">
-        <header class="mb-5">
-          <h1 class="heading-xl">Ajustes</h1>
-        </header>
+      <section class="page-enter page">
+        <div class="page-header">
+          <span class="t-eyebrow">Ajustes</span>
+          <h1 class="t-display" style="margin-top:4px">La sala</h1>
+        </div>
 
-        <div class="space-y-4">
+        <div class="stack-loose">
           <div class="card">
-            <div class="section-title">Sala</div>
-            <div class="space-y-3">
+            <div class="section-header">
+              <span class="t-eyebrow">Identidad</span>
+            </div>
+            <div class="stack">
               <div>
                 <label class="label">Nombre de la sala</label>
                 <input class="input" id="room-name" value="${room?.name || ''}" />
               </div>
-              <div class="grid grid-cols-2 gap-3">
+              <div class="grid-2">
                 <div>
-                  <label class="label">Tu nombre</label>
+                  <label class="label">Tú</label>
                   <input class="input" id="owner-name" value="${room?.owner_name || 'Haziel'}" />
                 </div>
                 <div>
@@ -40,42 +43,61 @@ export async function settingsView(root) {
                   <input class="input" id="partner-name" value="${room?.partner_name || 'Areli'}" />
                 </div>
               </div>
-              <button class="btn btn-primary btn-block" id="save-room">Guardar</button>
+              <button class="btn btn-ink btn-block" id="save-room">Guardar</button>
             </div>
           </div>
 
           <div class="card">
-            <div class="section-title">Notificaciones</div>
-            <div class="flex items-center justify-between">
+            <div class="section-header">
+              <span class="t-eyebrow">Notificaciones</span>
+            </div>
+            <div class="row-between">
               <div>
-                <div class="font-medium">Recordatorios de pago</div>
-                <div class="text-xs text-stone">Recibe avisos antes de fechas de pago y corte</div>
+                <div style="font-weight:500">Recordatorios</div>
+                <div class="t-small" style="margin-top:2px">Avisos antes de pagos y cortes</div>
               </div>
-              <button class="btn ${pushOn ? 'btn-primary' : 'btn-outline'} btn-sm" id="toggle-push">
+              <button class="btn ${pushOn ? 'btn-ink' : 'btn-outline'} btn-sm" id="toggle-push">
                 ${pushOn ? 'Activadas' : 'Activar'}
               </button>
             </div>
           </div>
 
           <div class="card">
-            <div class="section-title">Datos</div>
-            <div class="space-y-2 text-sm">
-              <div class="flex justify-between"><span class="text-stone">Tarjetas</span><span class="font-semibold">${cards.length}</span></div>
-              <div class="flex justify-between"><span class="text-stone">Gastos</span><span class="font-semibold">${expenses.length}</span></div>
-              <div class="flex justify-between"><span class="text-stone">Pagos</span><span class="font-semibold">${payments.length}</span></div>
-              <div class="flex justify-between"><span class="text-stone">Categorías</span><span class="font-semibold">${categories.length}</span></div>
+            <div class="section-header">
+              <span class="t-eyebrow">Datos</span>
             </div>
-            <div class="grid grid-cols-2 gap-2 mt-4">
-              <button class="btn btn-text btn-block btn-sm" id="goto-cards">Tarjetas</button>
-              <button class="btn btn-text btn-block btn-sm" id="goto-cats">Categorías</button>
+            <div class="grid-2">
+              <div>
+                <div class="stat-label">Tarjetas</div>
+                <div class="stat-value t-mono" style="font-size:22px;margin-top:4px">${cards.length}</div>
+              </div>
+              <div>
+                <div class="stat-label">Gastos</div>
+                <div class="stat-value t-mono" style="font-size:22px;margin-top:4px">${expenses.length}</div>
+              </div>
+              <div>
+                <div class="stat-label">Pagos</div>
+                <div class="stat-value t-mono" style="font-size:22px;margin-top:4px">${payments.length}</div>
+              </div>
+              <div>
+                <div class="stat-label">Categorías</div>
+                <div class="stat-value t-mono" style="font-size:22px;margin-top:4px">${categories.length}</div>
+              </div>
             </div>
           </div>
 
-          <button class="btn btn-text btn-block btn-sm text-coral" id="signout">Cerrar sesión de este dispositivo</button>
+          <div class="stack-tight">
+            <button class="btn btn-ghost btn-block btn-sm" id="goto-cards">Tarjetas →</button>
+            <button class="btn btn-ghost btn-block btn-sm" id="goto-cats">Categorías →</button>
+            <button class="btn btn-ghost btn-block btn-sm" id="goto-payments">Pagos →</button>
+            <button class="btn btn-ghost btn-block btn-sm" id="goto-history">Historial →</button>
+          </div>
 
-          <div class="text-center text-xs text-stone pt-4">
-            <p>Nuestras Finanzas · v1.0</p>
-            <p class="mt-1">Código compartido: <strong>1234</strong></p>
+          <button class="btn btn-ghost btn-block btn-sm" id="signout" style="color:var(--clay)">Cerrar sesión de este dispositivo</button>
+
+          <div style="text-align:center;padding:24px 0 8px">
+            <span class="folio">Nuestras Finanzas · Edición 2026</span>
+            <div style="margin-top:6px;font-family:var(--f-mono);font-size:10.5px;letter-spacing:0.1em;color:var(--ink-40);text-transform:uppercase">Código · 1234</div>
           </div>
         </div>
       </section>
@@ -123,6 +145,8 @@ export async function settingsView(root) {
 
     root.querySelector('#goto-cards').onclick = () => navigate('/cards');
     root.querySelector('#goto-cats').onclick = () => navigate('/categories');
+    root.querySelector('#goto-payments').onclick = () => navigate('/payments');
+    root.querySelector('#goto-history').onclick = () => navigate('/history');
     root.querySelector('#signout').onclick = async () => {
       const sb = await getSupabase();
       await sb.auth.signOut();
