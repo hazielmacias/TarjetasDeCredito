@@ -12,8 +12,8 @@ export async function welcomeView(root) {
   root.innerHTML = `
     <section class="page-enter page" style="min-height:100vh;display:flex;flex-direction:column;padding-top:48px;padding-bottom:24px">
       <div class="row-between" style="margin-bottom:48px">
-        <div class="brand-mark"><span class="dot"></span>N · F</div>
-        <span class="folio">Folio · 0001</span>
+        <div class="brand-mark"><span class="dot"></span></div>
+        <span></span>
       </div>
 
       <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
@@ -29,7 +29,7 @@ export async function welcomeView(root) {
 
         <p class="t-serif-body" style="margin-top:24px;max-width:340px">
           Tarjetas, pagos y gastos compartidos en un cuaderno
-          que ambos pueden leer — sin contraseñas, sin caos.
+          que Areli y Haziel pueden leer.
         </p>
       </div>
 
