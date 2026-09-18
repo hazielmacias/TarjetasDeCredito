@@ -30,9 +30,8 @@ function colorToText(hex) {
 }
 
 export function cardItem(card, { spent = 0 } = {}) {
-  const limit = +card.credit_limit || 0;
-  const disponible = Math.max(0, limit - spent);
-  const uso = limit > 0 ? Math.min(100, (spent / limit) * 100) : 0;
+  const disponible = Math.max(0, +card.credit_limit - spent);
+  const uso = card.credit_limit > 0 ? Math.min(100, (spent / card.credit_limit) * 100) : 0;
   const proxPago = proximaFechaPorDia(card.payment_day);
   const proxCorte = proximaFechaPorDia(card.cutoff_day);
   const bg = card.color || EDITORIAL_COLORS[0];
@@ -42,62 +41,50 @@ export function cardItem(card, { spent = 0 } = {}) {
 
   return `
     <article class="card-pass" data-id="${card.id}" style="--pass-bg:${bg};color:${invert}">
-      <div class="card-pass-top">
-        <div style="display:flex;align-items:center;gap:8px">
-          <div class="card-chip-emboss" style="border-color:rgba(255,255,255,0.2);color:${invert}">${initials}</div>
-          <div>
-            <div class="card-pass-bank" style="color:${invert};opacity:0.75">${card.bank || 'Banco'}</div>
-          </div>
+      <div class="row-between" style="margin-bottom:14px">
+        <div>
+          <div style="font-family:var(--f-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;opacity:0.7">${card.bank || 'Banco'}</div>
         </div>
         <span class="pill ${ownerPill}" style="background:rgba(255,255,255,0.18);color:${invert}">${card.owner}</span>
       </div>
 
-      <div class="card-pass-name" style="color:${invert}">${card.name}</div>
+      <div class="pass-name" style="color:${invert}">${card.name}</div>
 
-      <div class="card-pass-emboss">
-        <div class="emboss-dot" style="background:${invert};opacity:0.45"></div>
-        <div class="emboss-dot" style="background:${invert};opacity:0.45"></div>
+      <div class="pass-stripe"></div>
+
+      <div class="row-between" style="margin-top:18px;align-items:flex-end">
+        <div>
+          <div class="pass-meta" style="opacity:0.7">Límite usado</div>
+          <div style="font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-size:17px;font-weight:500;letter-spacing:-0.02em;color:${invert}">
+            ${mxn(spent)}
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div class="pass-meta" style="opacity:0.7">Disponible</div>
+          <div style="font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-size:17px;font-weight:500;letter-spacing:-0.02em;color:${invert}">
+            ${mxn(disponible)}
+          </div>
+        </div>
       </div>
 
-      <div class="card-pass-amounts">
-        <div class="card-pass-stat">
-          <div class="card-pass-stat-label" style="color:${invert};opacity:0.65">Límite usado</div>
-          <div class="card-pass-stat-value" style="color:${invert};font-variant-numeric:tabular-nums">${mxn(spent)}</div>
-        </div>
-        <div class="card-pass-stat-divider" style="background:${invert};opacity:0.2"></div>
-        <div class="card-pass-stat">
-          <div class="card-pass-stat-label" style="color:${invert};opacity:0.65">Disponible</div>
-          <div class="card-pass-stat-value" style="color:${invert};font-variant-numeric:tabular-nums">${mxn(disponible)}</div>
-        </div>
-      </div>
-
-      <div class="card-pass-progress-wrap">
-        <div class="card-pass-progress-row" style="color:${invert};opacity:0.75">
+      <div style="margin-top:14px">
+        <div class="row-between" style="margin-bottom:6px;font-family:var(--f-mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;opacity:0.7">
           <span>Uso ${uso.toFixed(0)}%</span>
-          <span>Límite ${mxn(limit)}</span>
+          <span>de ${mxn(card.credit_limit)}</span>
         </div>
-        <div class="card-pass-progress">
-          <div class="card-pass-progress-bar" style="width:${uso}%;background:${invert}"></div>
-        </div>
-      </div>
-
-      <div class="card-pass-foot" style="color:${invert};opacity:0.7;border-top-color:rgba(255,255,255,0.18)">
-        <div class="card-pass-foot-item">
-          <span class="card-pass-foot-label">Corte</span>
-          <span class="card-pass-foot-value" style="color:${invert}">Día ${card.cutoff_day}</span>
-        </div>
-        <div class="card-pass-foot-item" style="text-align:right">
-          <span class="card-pass-foot-label">Pago</span>
-          <span class="card-pass-foot-value" style="color:${invert}">${fechaCorta(proxPago)}</span>
+        <div style="height:4px;background:rgba(255,255,255,0.2);border-radius:99px;overflow:hidden">
+          <div style="height:100%;width:${uso}%;background:${invert};border-radius:inherit"></div>
         </div>
       </div>
 
-      <div class="card-actions" style="border-top-color:rgba(255,255,255,0.18)">
-        <button type="button" class="card-action-btn" data-act="edit" data-id="${card.id}" style="background:rgba(255,255,255,0.16);color:${invert};border-color:rgba(255,255,255,0.22)">
+      <div class="card-actions" style="margin-top:18px;border-top:1px solid rgba(255,255,255,0.16);padding-top:14px;display:flex;gap:8px;justify-content:flex-end">
+        <button type="button" class="card-action-btn" data-act="edit" data-id="${card.id}"
+          style="background:rgba(255,255,255,0.14);color:${invert};border:1px solid rgba(255,255,255,0.2);padding:8px 14px;border-radius:8px;font-family:var(--f-ui);font-size:12.5px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px;letter-spacing:-0.005em">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Editar
         </button>
-        <button type="button" class="card-action-btn" data-act="delete" data-id="${card.id}" style="background:rgba(255,255,255,0.06);color:${invert};border-color:rgba(255,255,255,0.14)">
+        <button type="button" class="card-action-btn" data-act="delete" data-id="${card.id}"
+          style="background:rgba(255,255,255,0.08);color:${invert};border:1px solid rgba(255,255,255,0.16);padding:8px 14px;border-radius:8px;font-family:var(--f-ui);font-size:12.5px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px;letter-spacing:-0.005em">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Borrar
         </button>
