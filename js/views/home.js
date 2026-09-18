@@ -8,10 +8,22 @@ import { navigate } from '../router.js';
 
 export async function homeView(root) {
   let state = getState();
+  let deviceOwner = (() => { try { return localStorage.getItem('nf-device-owner') || 'Haziel'; } catch { return 'Haziel'; } })();
   const unsubscribe = subscribe((s) => {
     state = s;
     render();
   });
+
+  // Re-render cuando cambia el owner del dispositivo
+  const onStorage = (e) => {
+    if (e.key === 'nf-device-owner') {
+      try { deviceOwner = localStorage.getItem('nf-device-owner') || 'Haziel'; } catch {}
+      render();
+    }
+  };
+  window.addEventListener('storage', onStorage);
+  // Custom event para cambios en el mismo tab
+  window.addEventListener('nf-device-owner-change', onStorage);
 
   function render() {
     const { room, cards, expenses, payments, currentMonth } = state;
@@ -34,7 +46,8 @@ export async function homeView(root) {
 
     const disponibles = cards.reduce((acc, c) => acc + Math.max(0, +c.credit_limit - (spentByCard[c.id] || 0)), 0);
 
-    const ownerName = room?.owner_name || 'Haziel';
+    // Usar el deviceOwner (toggle local del dispositivo) en lugar de room.owner_name
+    const ownerName = deviceOwner;
 
     root.innerHTML = `
       <section class="page-enter page">
@@ -187,7 +200,11 @@ export async function homeView(root) {
   }
 
   render();
-  return () => unsubscribe();
+  return () => {
+    unsubscribe();
+    window.removeEventListener('storage', onStorage);
+    window.removeEventListener('nf-device-owner-change', onStorage);
+  };
 }
 
 function formatNum(n) {

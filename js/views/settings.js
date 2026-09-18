@@ -129,6 +129,8 @@ export async function settingsView(root) {
       e.stopPropagation();
       deviceOwner = b.dataset.val;
       try { localStorage.setItem('nf-device-owner', deviceOwner); } catch {}
+      // Disparar evento custom para que vistas activas (home) se enteren
+      window.dispatchEvent(new CustomEvent('nf-device-owner-change', { detail: { owner: deviceOwner } }));
       toast(`Eres ${deviceOwner} en este dispositivo`);
       render();
     });
