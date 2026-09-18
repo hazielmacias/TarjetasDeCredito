@@ -1,5 +1,5 @@
 /* Service Worker — Nuestras Finanzas */
-const CACHE_NAME = 'nf-v16-' + Date.now();
+const CACHE_NAME = 'nf-v17-' + Date.now();
 const PRECACHE = ['./', './index.html', './manifest.json', './css/styles.css', './js/app.js'];
 
 self.addEventListener('install', (event) => {

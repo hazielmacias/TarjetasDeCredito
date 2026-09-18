@@ -1069,7 +1069,8 @@ body {
   .quick-actions { display: flex; gap: 8px; }
 
   /* PC: #app ocupa todo el ancho a la derecha de la sidebar.
-     El .page dentro se centra con max-width para legibilidad. */
+     Importante: sobrescribir max-width del mobile (480px) que limita
+     el ancho si no se quita explícitamente. */
   #app {
     width: calc(100vw - 248px);
     max-width: none;
