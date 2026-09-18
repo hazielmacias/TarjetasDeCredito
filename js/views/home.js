@@ -41,7 +41,16 @@ export async function homeView(root) {
         <div class="page-header">
           <div class="row-between" style="margin-bottom:32px">
             <div class="brand-mark"><span class="dot"></span></div>
-            <span></span>
+            <div class="quick-actions">
+              <button class="btn btn-ink btn-sm" id="qa-expense">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                Gasto
+              </button>
+              <button class="btn btn-outline btn-sm" id="qa-card">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                Tarjeta
+              </button>
+            </div>
           </div>
 
           <div style="margin-bottom:6px">
@@ -132,8 +141,13 @@ export async function homeView(root) {
         ` : ''}
 
         ${!cards.length ? `
-          <div class="empty" style="margin-top:32px">
-            Comienza por aquí →<br>agrega tu primera tarjeta.
+          <div class="card" style="text-align:center;padding:48px 24px;margin-top:32px">
+            <div class="t-display-sm" style="margin-bottom:8px">Comienza por aquí</div>
+            <p class="t-serif-body" style="margin-bottom:24px">Agrega tu primera tarjeta para empezar a registrar gastos.</p>
+            <button class="btn btn-ink btn-lg" id="empty-add-card">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              Agregar primera tarjeta
+            </button>
           </div>
         ` : ''}
       </section>
@@ -147,7 +161,14 @@ export async function homeView(root) {
 
     root.appendChild(renderBottomNav());
 
-    root.querySelector('#fab').addEventListener('click', () => navigate('/expenses/new'));
+    const fab = root.querySelector('#fab');
+    if (fab) fab.addEventListener('click', () => navigate('/expenses/new'));
+    const qaExp = root.querySelector('#qa-expense');
+    if (qaExp) qaExp.onclick = () => navigate('/expenses/new');
+    const qaCard = root.querySelector('#qa-card');
+    if (qaCard) qaCard.onclick = () => navigate('/cards');
+    const emptyAdd = root.querySelector('#empty-add-card');
+    if (emptyAdd) emptyAdd.onclick = () => navigate('/cards');
     const goAll = root.querySelector('#see-all-cards');
     if (goAll) goAll.onclick = () => navigate('/cards');
     const goExp = root.querySelector('#see-all-exp');

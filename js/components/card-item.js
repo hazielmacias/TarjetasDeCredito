@@ -66,5 +66,5 @@ export function cardList(cards, { spentByCard = {} } = {}) {
   if (!cards.length) {
     return `<div class="empty">Aún no hay tarjetas. Agrega una para empezar.</div>`;
   }
-  return `<div class="stack">${cards.map((c) => cardItem(c, { spent: spentByCard[c.id] || 0 })).join('')}</div>`;
+  return `<div class="cards-grid">${cards.map((c) => cardItem(c, { spent: spentByCard[c.id] || 0 })).join('')}</div>`;
 }

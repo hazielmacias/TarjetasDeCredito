@@ -39,9 +39,9 @@ export async function expensesView(root) {
             <h1 class="t-display" style="margin-top:4px">Gastos</h1>
             <div class="t-small" style="margin-top:4px"><span class="t-mono">${monthExpenses.length}</span> este mes · <span class="t-mono">${mxn(total)}</span></div>
           </div>
-          <button class="btn btn-ink btn-sm" id="add-exp">
+          <button class="btn btn-ink" id="add-exp">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            Agregar
+            Agregar gasto
           </button>
         </div>
 
@@ -77,6 +77,17 @@ export async function expensesView(root) {
             <span class="t-eyebrow">Movimientos del mes</span>
           </div>
           ${expenseList(monthExpenses, { categories, cards, emptyText: 'Sin gastos este mes.' })}
+
+          ${!monthExpenses.length ? `
+            <div class="card" style="text-align:center;padding:48px 24px">
+              <div class="t-display-sm" style="margin-bottom:8px">Sin gastos este mes</div>
+              <p class="t-serif-body" style="margin-bottom:24px">Registra tu primer gasto para llevar el control.</p>
+              <button class="btn btn-ink btn-lg" id="empty-add-exp">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                Agregar primer gasto
+              </button>
+            </div>
+          ` : ''}
         </div>
       </section>
 
@@ -88,7 +99,10 @@ export async function expensesView(root) {
     root.appendChild(renderBottomNav());
 
     root.querySelector('#add-exp').onclick = () => navigate('/expenses/new');
-    root.querySelector('#fab').onclick = () => navigate('/expenses/new');
+    const emptyBtn = root.querySelector('#empty-add-exp');
+    if (emptyBtn) emptyBtn.onclick = () => navigate('/expenses/new');
+    const fab = root.querySelector('#fab');
+    if (fab) fab.onclick = () => navigate('/expenses/new');
 
     root.querySelectorAll('[data-id]').forEach((el) => {
       el.onclick = () => openExpenseDetail(el.dataset.id);

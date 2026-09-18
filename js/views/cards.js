@@ -31,9 +31,9 @@ export async function cardsView(root) {
             <h1 class="t-display" style="margin-top:4px">Tarjetas</h1>
             <div class="t-small" style="margin-top:4px">${cards.length} activa${cards.length === 1 ? '' : 's'}</div>
           </div>
-          <button class="btn btn-ink btn-sm" id="add-card">
+          <button class="btn btn-ink" id="add-card">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            Agregar
+            Agregar tarjeta
           </button>
         </div>
 
@@ -53,6 +53,17 @@ export async function cardsView(root) {
         ` : ''}
 
         <div id="cards-container">${cardList(cards, { spentByCard })}</div>
+
+        ${!cards.length ? `
+          <div class="card" style="text-align:center;padding:48px 24px">
+            <div class="t-display-sm" style="margin-bottom:8px">Aún no hay tarjetas</div>
+            <p class="t-serif-body" style="margin-bottom:24px">Comienza agregando tu primera tarjeta de crédito.</p>
+            <button class="btn btn-ink btn-lg" id="empty-add-card">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              Agregar primera tarjeta
+            </button>
+          </div>
+        ` : ''}
       </section>
 
       <button class="fab" id="fab" aria-label="Nueva tarjeta">
@@ -63,7 +74,10 @@ export async function cardsView(root) {
     root.appendChild(renderBottomNav());
 
     root.querySelector('#add-card').addEventListener('click', () => openCardForm());
-    root.querySelector('#fab').addEventListener('click', () => openCardForm());
+    const emptyBtn = root.querySelector('#empty-add-card');
+    if (emptyBtn) emptyBtn.addEventListener('click', () => openCardForm());
+    const fab = root.querySelector('#fab');
+    if (fab) fab.addEventListener('click', () => openCardForm());
 
     root.querySelectorAll('[data-id]').forEach((el) => {
       el.addEventListener('click', () => {

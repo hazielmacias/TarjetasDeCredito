@@ -62,6 +62,5 @@ export function refreshActive() {
 }
 
 export function shouldShowNav() {
-  const path = currentPath();
-  return NAV.some((n) => isActive(n.path, path));
+  return true;
 }
