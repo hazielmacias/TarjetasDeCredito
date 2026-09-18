@@ -882,6 +882,52 @@ body {
   content: '';
   position: absolute;
   inset: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0.06 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: inherit;
+}
+
+/* ==========================================================
+   Desktop — ocultar UI mobile-only
+   ========================================================== */
+@media (min-width: 768px) {
+  .bottom-nav { display: none; }
+  .fab { display: none; }
+  #app { padding-bottom: 24px; }
+}
+
+/* ==========================================================
+   Hover/click affordances — más explícitos en PC
+   ========================================================== */
+@media (hover: hover) {
+  .chip {
+    transition: transform 120ms ease, background-color 180ms ease, border-color 180ms ease, color 180ms ease;
+  }
+  .chip:hover {
+    border-color: var(--ink-20);
+    transform: translateY(-1px);
+  }
+  .chip.active:hover {
+    transform: translateY(0);
+  }
+  .btn:hover {
+    transform: translateY(-1px);
+  }
+  .btn:active {
+    transform: translateY(0) scale(0.98);
+  }
+}
+
+/* Inputs en PC — pointer cursor explícito */
+@media (hover: hover) {
+  .input, .select, .textarea { cursor: text; }
+}
+.grain::before {
+  content: '';
+  position: absolute;
+  inset: 0;
   background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.06 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
   opacity: 0.5;
   pointer-events: none;

@@ -125,7 +125,9 @@ export async function settingsView(root) {
 
     root.querySelector('#owner-toggle').addEventListener('click', (e) => {
       const b = e.target.closest('[data-val]');
-      if (!b) return;
+      if (!b || !e.currentTarget.contains(b)) return;
+      e.preventDefault();
+      e.stopPropagation();
       deviceOwner = b.dataset.val;
       try { localStorage.setItem('nf-device-owner', deviceOwner); } catch {}
       toast(`Eres ${deviceOwner} en este dispositivo`);

@@ -154,7 +154,9 @@ export async function paymentFormView(root, qs = {}) {
   function bindGroup(group, key, valAttr = 'val') {
     group.addEventListener('click', (e) => {
       const b = e.target.closest(`[data-${valAttr}]`);
-      if (!b) return;
+      if (!b || !group.contains(b)) return;
+      e.preventDefault();
+      e.stopPropagation();
       group.querySelectorAll('.chip').forEach((c) => c.classList.remove('active'));
       b.classList.add('active');
       selected[key] = valAttr === 'id' ? b.dataset.id : b.dataset.val;

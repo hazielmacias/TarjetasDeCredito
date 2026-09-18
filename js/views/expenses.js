@@ -186,7 +186,9 @@ export async function expenseFormView(root, qs = {}) {
   function bindChipGroup(group, key) {
     group.addEventListener('click', (e) => {
       const b = e.target.closest('[data-id], [data-val]');
-      if (!b) return;
+      if (!b || !group.contains(b)) return;
+      e.preventDefault();
+      e.stopPropagation();
       group.querySelectorAll('.chip').forEach((c) => c.classList.remove('active'));
       b.classList.add('active');
       selected[key] = b.dataset.id || b.dataset.val;

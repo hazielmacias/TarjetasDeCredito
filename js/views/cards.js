@@ -149,6 +149,8 @@ function openCardForm(existing = null) {
       r.querySelector('[data-group="owner"]').addEventListener('click', (e) => {
         const b = e.target.closest('[data-val]');
         if (!b) return;
+        e.preventDefault();
+        e.stopPropagation();
         owner = b.dataset.val;
         r.querySelectorAll('[data-group="owner"] .chip').forEach((c) => c.classList.remove('active'));
         b.classList.add('active');
@@ -157,6 +159,8 @@ function openCardForm(existing = null) {
       r.querySelector('[data-group="color"]').addEventListener('click', (e) => {
         const b = e.target.closest('[data-val]');
         if (!b) return;
+        e.preventDefault();
+        e.stopPropagation();
         color = b.dataset.val;
         r.querySelectorAll('[data-group="color"] .chip').forEach((c) => {
           c.classList.remove('active');

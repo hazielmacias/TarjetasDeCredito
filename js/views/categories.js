@@ -111,6 +111,8 @@ function openCategoryForm() {
       r.querySelector('#f-colors').addEventListener('click', (e) => {
         const b = e.target.closest('[data-val]');
         if (!b) return;
+        e.preventDefault();
+        e.stopPropagation();
         color = b.dataset.val;
         r.querySelectorAll('#f-colors .chip').forEach((c) => {
           c.classList.remove('active');
