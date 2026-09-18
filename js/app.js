@@ -71,10 +71,31 @@ async function boot() {
   try {
     const session = await getSession();
     if (session) {
-      const { room } = await loadRoomFromSession(session.user.id);
+      let room = (await loadRoomFromSession(session.user.id))?.room;
+
+      // Fallback: si no encontramos room_device (por RLS o porque no existe),
+      // llamar a join-room que es la fuente de verdad.
+      if (!room) {
+        try {
+          const { joinOrCreateRoom } = await import('./api/rooms.js');
+          const res = await joinOrCreateRoom('Boot');
+          room = res?.room;
+        } catch (e) {
+          console.warn('joinOrCreateRoom en boot:', e);
+        }
+      }
+
       if (room) {
         const { setState } = await import('./store.js');
         setState({ session, room });
+        // Cargar todos los datos del room (cards, expenses, payments, categories)
+        // ANTES del primer render para que la UI no muestre estados vacíos.
+        try {
+          const { refreshAll } = await import('./api/sync.js');
+          await refreshAll();
+        } catch (e) {
+          console.warn('refreshAll on boot:', e);
+        }
       }
     }
   } catch (e) {

@@ -975,30 +975,28 @@ body {
   .desktop-nav { display: flex; }
   .quick-actions { display: flex; gap: 8px; }
 
-  /* PC: #app se posiciona después de la sidebar (248px) y el contenido
-     visible se centra en el área restante. Usa padding-inline generoso
-     cuando el viewport es amplio, o padding mínimo (296px = 248 sidebar
-     + 48 gap) cuando es estrecho. */
+  /* PC: #app ocupa todo el ancho a la derecha de la sidebar */
   #app {
     width: calc(100% - 248px);
     margin-left: 248px;
-    margin-right: auto;
+    margin-right: 0;
     padding: 0 48px 64px;
     box-sizing: border-box;
   }
 
-  /* Cada vista (.page) se centra en el ancho del #app */
+  /* .page ocupa todo el ancho del #app (sin max-width restrictivo) */
   .page {
-    max-width: 880px;
-    margin-left: auto;
-    margin-right: auto;
+    max-width: none;
   }
 
-  /* Pages con más aire */
-  .page { padding: 0; }
+  /* Header de cada vista: mejor distribución en PC */
   .page-header { padding: 40px 0 28px; }
-  .grid-2 { gap: 16px; }
-  .stack > * + * { margin-top: 20px; }
+  .page-header.row-between { gap: 24px; }
+
+  /* Stats y grids aprovechan el ancho */
+  .grid-2 { gap: 24px; }
+  .grid-3 { gap: 24px; }
+  .stack > * + * { margin-top: 24px; }
 
   /* Cards en PC — más espacio y respiración */
   .card { padding: 24px; }
@@ -1049,11 +1047,6 @@ body {
 @keyframes modal-in {
   from { opacity: 0; transform: translateY(12px) scale(0.98); }
   to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-/* Pantallas muy anchas: limitar contenido para legibilidad */
-@media (min-width: 1280px) {
-  .page { max-width: 940px; }
 }
 
 /* ==========================================================
