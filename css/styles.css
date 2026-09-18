@@ -893,9 +893,8 @@ body {
    Desktop — ocultar UI mobile-only
    ========================================================== */
 @media (min-width: 768px) {
-  .bottom-nav { display: none; }
   .fab { display: none; }
-  #app { padding-bottom: 24px; }
+  #app { padding-bottom: 96px; }
 }
 
 /* ==========================================================
@@ -976,7 +975,12 @@ body {
   #app {
     margin-left: 248px;
     max-width: none;
-    padding-bottom: 24px;
+    padding-bottom: 96px;
+  }
+  /* Bottom-nav en PC: ajustar para que conviva con la sidebar */
+  .bottom-nav {
+    width: 480px;
+    bottom: 16px;
   }
 }
 

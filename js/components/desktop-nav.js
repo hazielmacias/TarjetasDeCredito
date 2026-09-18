@@ -20,6 +20,17 @@ const ICONS = {
   gear: '<circle cx="12" cy="12" r="2.5" stroke="currentColor" stroke-width="1.6" fill="none"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'
 };
 
+function rootSegment(p) {
+  const segs = p.split('/').filter(Boolean);
+  if (segs.length === 0) return '/';
+  return '/' + segs[0];
+}
+
+function isActive(itemPath, current) {
+  if (itemPath === '/') return current === '/';
+  return rootSegment(current) === itemPath;
+}
+
 export function renderDesktopNav() {
   const wrap = document.createElement('aside');
   wrap.className = 'desktop-nav';
@@ -36,7 +47,7 @@ export function renderDesktopNav() {
 
     <nav class="desktop-nav-list">
       ${NAV.map((n) => `
-        <button class="desktop-nav-item ${path === n.path ? 'active' : ''}" data-path="${n.path}">
+        <button class="desktop-nav-item ${isActive(n.path, path) ? 'active' : ''}" data-path="${n.path}">
           <svg viewBox="0 0 24 24" fill="none">${ICONS[n.icon]}</svg>
           <span>${n.label}</span>
         </button>
@@ -54,6 +65,16 @@ export function renderDesktopNav() {
   });
 
   return wrap;
+}
+
+export function refreshDesktopActive() {
+  const nav = document.querySelector('.desktop-nav');
+  if (!nav) return;
+  const path = currentPath();
+  nav.querySelectorAll('.desktop-nav-item').forEach((btn) => {
+    if (isActive(btn.dataset.path, path)) btn.classList.add('active');
+    else btn.classList.remove('active');
+  });
 }
 
 export function shouldShowNav() {

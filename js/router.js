@@ -1,7 +1,8 @@
 /**
  * Router minimalista basado en hash (#/path).
  */
-import { renderDesktopNav } from './components/desktop-nav.js';
+import { renderDesktopNav, refreshDesktopActive } from './components/desktop-nav.js';
+import { refreshActive as refreshBottomActive } from './components/bottom-nav.js';
 
 const routes = new Map();
 let currentRoute = null;
@@ -24,6 +25,8 @@ export function navigate(path) {
   } else {
     render();
   }
+  refreshDesktopActive();
+  refreshBottomActive();
 }
 
 window.addEventListener('hashchange', render);
@@ -73,6 +76,8 @@ export async function render() {
   }
 
   ensureDesktopNav();
+  refreshDesktopActive();
+  refreshBottomActive();
 }
 
 // Inicializar la nav al cargar
