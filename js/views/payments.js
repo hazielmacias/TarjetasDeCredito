@@ -68,7 +68,7 @@ export async function paymentsView(root) {
 
     root.appendChild(renderBottomNav());
 
-    root.querySelector('#add-pay').onclick = () => openPaymentForm();
+    root.querySelector('#add-pay').onclick = () => navigate('/payments/new');
     root.querySelectorAll('[data-id]').forEach((el) => {
       el.onclick = () => {
         const p = payments.find((x) => x.id === el.dataset.id);

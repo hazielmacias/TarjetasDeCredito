@@ -49,7 +49,11 @@ route('/payments', async (root) => {
 });
 route('/payments/new', async (root) => {
   if (!getState().room) return navigate('/welcome');
-  const qs = Object.fromEntries(new URLSearchParams(window.location.search.replace(/^\?/, '')));
+  // El query string puede estar en window.location.search O en el hash
+  const searchStr = window.location.hash.includes('?')
+    ? window.location.hash.split('?')[1] || ''
+    : window.location.search.replace(/^\?/, '');
+  const qs = Object.fromEntries(new URLSearchParams(searchStr));
   return paymentFormView(root, qs);
 });
 route('/categories', async (root) => {

@@ -132,8 +132,19 @@ function openCardForm(existing = null) {
     { v: '#4a5d3a', label: 'Oliva' },
     { v: '#6b3e5e', label: 'Ciruela' },
     { v: '#d4a017', label: 'Ocre' },
-    { v: '#1a1814', label: 'Tinta' }
+    { v: '#1a1814', label: 'Tinta' },
+    { v: '#7c2d3a', label: 'Carmesí' },
+    { v: '#3d5a6c', label: 'Pizarra' },
+    { v: '#5d4a2e', label: 'Café' },
+    { v: '#6b5b95', label: 'Lavanda' },
+    { v: '#2d6a4f', label: 'Bosque' },
+    { v: '#b5651d', label: 'Cobre' },
+    { v: '#5a4fcf', label: 'Índigo' },
+    { v: '#8b3a62', label: 'Vino' },
+    { v: '#3a6b5d', label: 'Salvia' },
+    { v: '#a0522d', label: 'Siena' }
   ];
+  const currentColor = existing?.color || colors[0].v;
 
   modal(`
     <div class="modal-handle"></div>
@@ -176,14 +187,12 @@ function openCardForm(existing = null) {
       </div>
       <div>
         <label class="label">Color</label>
-        <div class="chip-group" data-group="color">
+        <div class="color-swatches" data-group="color">
           ${colors.map((c) => `
-            <button type="button" class="chip ${(existing?.color || colors[0].v) === c.v ? 'active' : ''}" data-val="${c.v}" style="${(existing?.color || colors[0].v) === c.v ? `background:${c.v};color:#fff;border-color:${c.v}` : ''}">
-              <span style="width:10px;height:10px;border-radius:50%;background:${c.v};display:inline-block"></span>
-              ${c.label}
-            </button>
+            <button type="button" class="color-swatch ${currentColor === c.v ? 'active' : ''}" data-val="${c.v}" data-label="${c.label}" title="${c.label}" style="background:${c.v}"></button>
           `).join('')}
         </div>
+        <div class="color-label" id="color-label" style="margin-top:8px;font-family:var(--f-mono);font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-60)">${colors.find((c) => c.v === currentColor)?.label || ''}</div>
       </div>
       <button class="btn btn-ink btn-block btn-lg" id="f-save">${isEdit ? 'Guardar cambios' : 'Crear tarjeta'}</button>
       ${isEdit ? `<button class="btn btn-ghost btn-block btn-sm" id="f-delete" style="color:var(--clay)">Eliminar tarjeta</button>` : ''}
@@ -191,7 +200,7 @@ function openCardForm(existing = null) {
   `, {
     onMount: ({ root: r, close }) => {
       let owner = existing?.owner || 'Haziel';
-      let color = existing?.color || colors[0].v;
+      let color = currentColor;
 
       r.querySelector('[data-group="owner"]').addEventListener('click', (e) => {
         const b = e.target.closest('[data-val]');
@@ -209,16 +218,9 @@ function openCardForm(existing = null) {
         e.preventDefault();
         e.stopPropagation();
         color = b.dataset.val;
-        r.querySelectorAll('[data-group="color"] .chip').forEach((c) => {
-          c.classList.remove('active');
-          c.style.background = '';
-          c.style.color = '';
-          c.style.borderColor = '';
-        });
+        r.querySelectorAll('[data-group="color"] .color-swatch').forEach((c) => c.classList.remove('active'));
         b.classList.add('active');
-        b.style.background = color;
-        b.style.color = '#fff';
-        b.style.borderColor = color;
+        r.querySelector('#color-label').textContent = b.dataset.label;
       });
 
       r.querySelector('[data-act="close"]').onclick = close;

@@ -20,8 +20,12 @@ export function route(path, handler) {
 }
 
 export function navigate(path) {
-  if (window.location.hash !== `#${path}`) {
-    window.location.hash = `#${path}`;
+  const [basePath, queryString] = path.split('?');
+  if (window.location.hash !== `#${basePath}` || window.location.search.replace(/^\?/, '') !== (queryString || '')) {
+    const newUrl = queryString
+      ? `#${basePath}?${queryString}`
+      : `#${basePath}`;
+    window.location.hash = newUrl;
   } else {
     render();
   }
@@ -33,7 +37,8 @@ window.addEventListener('hashchange', render);
 
 export function currentPath() {
   const h = window.location.hash.replace(/^#/, '') || '/';
-  return h;
+  // Quitar query string y dejar solo el path
+  return h.split('?')[0] || '/';
 }
 
 export function refreshDesktopNav() {
