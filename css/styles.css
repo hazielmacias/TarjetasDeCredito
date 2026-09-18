@@ -86,6 +86,7 @@ body {
   min-height: 100dvh;
   padding-bottom: 96px;
   position: relative;
+  box-sizing: border-box;
 }
 
 /* ==========================================================
@@ -1071,7 +1072,9 @@ body {
      El .page dentro se centra con max-width para legibilidad. */
   #app {
     width: calc(100vw - 248px);
+    max-width: none;
     margin-left: 248px;
+    margin-right: 0;
     padding: 0 48px 64px;
     box-sizing: border-box;
   }
