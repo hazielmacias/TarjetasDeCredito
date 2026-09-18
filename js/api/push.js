@@ -60,7 +60,17 @@ export async function unsubscribeFromPush() {
 
 export async function isPushSubscribed() {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return false;
-  const reg = await navigator.serviceWorker.ready;
-  const sub = await reg.pushManager.getSubscription();
-  return !!sub;
+  // Esperar el SW con timeout para no colgar la UI si no se registra
+  const timeout = new Promise((resolve) => setTimeout(() => resolve(null), 1500));
+  const reg = await Promise.race([
+    navigator.serviceWorker.ready.catch(() => null),
+    timeout
+  ]);
+  if (!reg || !reg.pushManager) return false;
+  try {
+    const sub = await reg.pushManager.getSubscription();
+    return !!sub;
+  } catch {
+    return false;
+  }
 }

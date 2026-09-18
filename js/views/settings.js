@@ -1,4 +1,4 @@
-import { getState, subscribe } from '../store.js';
+import { getState, subscribe, setState } from '../store.js';
 import { mxn, mesNombre, hoyISO } from '../utils/format.js';
 import { renderBottomNav } from '../components/bottom-nav.js';
 import { subscribeToPush, unsubscribeFromPush, isPushSubscribed } from '../api/push.js';
@@ -6,11 +6,16 @@ import { toast } from '../utils/ui.js';
 import { navigate } from '../router.js';
 import { updateRoom } from '../api/rooms.js';
 import { getSupabase } from '../supabase.js';
-import { setState } from '../store.js';
 
 export async function settingsView(root) {
   let state = getState();
-  let pushOn = await isPushSubscribed();
+  let pushOn = false;
+  try {
+    pushOn = await isPushSubscribed();
+  } catch (e) {
+    console.warn('isPushSubscribed fallo:', e);
+    pushOn = false;
+  }
   let deviceOwner = (() => { try { return localStorage.getItem('nf-device-owner') || 'Haziel'; } catch { return 'Haziel'; } })();
   const unsubscribe = subscribe((s) => { state = s; render(); });
 
