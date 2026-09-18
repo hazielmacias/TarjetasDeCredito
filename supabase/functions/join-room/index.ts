@@ -1,7 +1,12 @@
 // Supabase Edge Function: join-room
-// Une al usuario actual a una sala mediante un código compartido.
-// Si la sala no existe, la crea.
-// Requiere que el usuario ya esté autenticado (anónimo o no).
+// Une al usuario actual a una sala.
+// Lógica:
+//   1. Si el usuario ya tiene un room_device registrado, lo reutiliza (no crear otro)
+//   2. Si no, busca un room con el nombre "Sala {access_code}"
+//   3. Si tampoco existe, lo crea
+//
+// Importante: una vez creado, el room puede ser renombrado por el usuario desde
+// Ajustes sin que esto afecte la asociación user↔room (que vive en room_devices).
 
 import { createClient } from 'jsr:@supabase/supabase-js@2.45.4';
 
@@ -34,62 +39,76 @@ Deno.serve(async (req) => {
     if (userErr || !userData?.user) return json({ error: 'Unauthorized' }, 401);
 
     const body = await req.json().catch(() => ({}));
-    const accessCode = String(body?.access_code || '').trim();
+    const accessCode = String(body?.access_code || '').trim().toLowerCase();
     const deviceName = String(body?.device_name || 'Dispositivo').trim();
 
     if (!accessCode || accessCode.length < 3) return json({ error: 'Código inválido' }, 400);
 
-    // Admin client para operaciones sin RLS
     const admin = createClient(supabaseUrl, serviceRoleKey, {
       auth: { autoRefreshToken: false, persistSession: false }
     });
 
-    // Determinar room: usamos el access_code como clave lógica.
-    // Para mantenerlo simple: el código normalizado (trim + lower) mapea a un nombre de room único.
-    const normalized = accessCode.toLowerCase();
+    const userId = userData.user.id;
 
-    // Buscar sala existente por nombre derivado del código
-    const roomName = `Sala ${normalized}`;
-    let { data: existing } = await admin
-      .from('rooms')
-      .select('*')
-      .eq('name', roomName)
+    // PASO 1: ¿Este usuario ya está unido a alguna sala? Si sí, reutilizarla.
+    const { data: existingDevice } = await admin
+      .from('room_devices')
+      .select('room_id, room:rooms(*)')
+      .eq('user_id', userId)
       .maybeSingle();
 
     let room;
-    if (existing) {
-      room = existing;
+    let created = false;
+
+    if (existingDevice?.room) {
+      room = existingDevice.room;
     } else {
-      const { data: created, error: createErr } = await admin
+      // PASO 2: Buscar una sala existente con el código como nombre
+      const roomName = `Sala ${accessCode}`;
+      const { data: existingRoom } = await admin
         .from('rooms')
-        .insert({ name: roomName, owner_name: 'Haziel', partner_name: 'Areli' })
-        .select()
-        .single();
-      if (createErr) return json({ error: createErr.message }, 500);
-      room = created;
+        .select('*')
+        .eq('name', roomName)
+        .maybeSingle();
+
+      if (existingRoom) {
+        room = existingRoom;
+      } else {
+        // PASO 3: Crear nueva sala
+        const { data: createdRoom, error: createErr } = await admin
+          .from('rooms')
+          .insert({ name: roomName, owner_name: 'Haziel', partner_name: 'Areli' })
+          .select()
+          .single();
+        if (createErr) return json({ error: createErr.message }, 500);
+        room = createdRoom;
+        created = true;
+      }
+
+      // Registrar el dispositivo
+      const { error: devErr } = await admin
+        .from('room_devices')
+        .insert({
+          room_id: room.id,
+          user_id: userId,
+          device_name: deviceName,
+          last_seen_at: new Date().toISOString()
+        });
+
+      if (devErr && !devErr.message?.includes('duplicate')) {
+        return json({ error: devErr.message }, 500);
+      }
     }
 
-    // Insertar/actualizar device
-    const { error: devErr } = await admin
+    // Actualizar last_seen_at
+    await admin
       .from('room_devices')
-      .upsert({
-        room_id: room.id,
-        user_id: userData.user.id,
-        device_name: deviceName,
-        last_seen_at: new Date().toISOString()
-      }, { onConflict: 'user_id' });
-
-    if (devErr) return json({ error: devErr.message }, 500);
-
-    // Generar sesión para que el cliente pueda usar el JWT
-    const { data: refreshed, error: refreshErr } = await userClient.auth.refreshSession();
-    const session = refreshed?.session ?? null;
-    if (refreshErr) console.warn('refresh err', refreshErr);
+      .update({ last_seen_at: new Date().toISOString(), device_name: deviceName })
+      .eq('user_id', userId);
 
     return json({
       room,
-      session: session || undefined,
-      message: existing ? 'Unido a la sala' : 'Sala creada'
+      message: created ? 'Sala creada' : 'Unido a la sala'
     });
   } catch (e) {
     return json({ error: e.message || 'Server error' }, 500);

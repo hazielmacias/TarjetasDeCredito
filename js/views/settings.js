@@ -115,7 +115,6 @@ export async function settingsView(root) {
 
           <div style="text-align:center;padding:24px 0 8px">
             <span class="folio">Nuestras Finanzas · Edición 2026</span>
-            <div style="margin-top:6px;font-family:var(--f-mono);font-size:10.5px;letter-spacing:0.1em;color:var(--ink-40);text-transform:uppercase">Código · 1234</div>
           </div>
         </div>
       </section>

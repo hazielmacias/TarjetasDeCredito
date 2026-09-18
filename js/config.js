@@ -8,8 +8,6 @@ const SUPABASE_CONFIG = {
   vapidPublicKey: '1Jg4S3qkUIuzaHpATQQIPFveBtdX8ilXxxoSlguQnLQ_xxOEmM6YNYXQDgh54nER71-itowsL7xZk2GG8IyiIEI'
 };
 
-const ROOM_ACCESS_CODE = '1234';
-
 /**
  * Credenciales compartidas. Ambos dispositivos usan la misma
  * cuenta autenticada; la distinción entre "Haziel" y "Areli"
@@ -22,4 +20,4 @@ const SHARED_CREDS = {
   password: 'nf-haziel-2026'
 };
 
-export { SUPABASE_CONFIG, ROOM_ACCESS_CODE, SHARED_CREDS };
+export { SUPABASE_CONFIG, SHARED_CREDS };

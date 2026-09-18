@@ -34,18 +34,8 @@ export async function welcomeView(root) {
       </div>
 
       <div class="stack">
-        <div class="card card-tinted">
-          <div class="row" style="align-items:flex-start">
-            <div style="width:36px;height:36px;border-radius:50%;background:var(--ink);color:var(--paper);display:flex;align-items:center;justify-content:center;font-family:var(--f-display);font-weight:600;font-size:14px;flex-shrink:0">1234</div>
-            <div style="flex:1">
-              <div style="font-family:var(--f-ui);font-weight:500;font-size:14px">Código compartido</div>
-              <div class="t-small">Usa <span class="t-mono" style="color:var(--clay);font-weight:600">1234</span> en ambos dispositivos para entrar a la misma sala.</div>
-            </div>
-          </div>
-        </div>
-
         <button id="enter-btn" class="btn btn-ink btn-block btn-lg">
-          Entrar a la sala
+          Entrar
         </button>
 
         <button id="reset-btn" class="btn btn-ghost btn-block btn-sm">
@@ -96,7 +86,7 @@ export async function welcomeView(root) {
       console.error('enter error:', e);
       status.innerHTML = `<span style="color:var(--clay)">${e.message || 'Error al conectar'}</span>`;
       btn.disabled = false;
-      btn.innerHTML = 'Entrar a la sala';
+      btn.innerHTML = 'Entrar';
     }
   }
 

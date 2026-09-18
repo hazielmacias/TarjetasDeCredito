@@ -1,9 +1,12 @@
 import { getSupabase, signInShared } from '../supabase.js';
-import { ROOM_ACCESS_CODE } from '../config.js';
+
+const DEFAULT_ACCESS_CODE = 'nf-shared';
 
 /**
  * Une o crea una sala mediante la Edge Function join-room.
- * Si el código coincide con uno existente se une; si no existe se crea.
+ * El backend primero busca si el usuario ya está unido a una sala
+ * (vía room_devices.user_id) — si lo está, la reutiliza. Esto
+ * garantiza que las tarjetas no se "pierdan" entre recargas.
  */
 export async function joinOrCreateRoom(deviceName = 'Dispositivo') {
   const session = await signInShared();
@@ -12,7 +15,7 @@ export async function joinOrCreateRoom(deviceName = 'Dispositivo') {
   const sb = await getSupabase();
   const res = await sb.functions.invoke('join-room', {
     body: {
-      access_code: ROOM_ACCESS_CODE,
+      access_code: DEFAULT_ACCESS_CODE,
       device_name: deviceName
     }
   });
