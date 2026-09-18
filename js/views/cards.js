@@ -79,10 +79,43 @@ export async function cardsView(root) {
     const fab = root.querySelector('#fab');
     if (fab) fab.addEventListener('click', () => openCardForm());
 
+    // Click en la tarjeta abre detalle
     root.querySelectorAll('[data-id]').forEach((el) => {
-      el.addEventListener('click', () => {
+      el.addEventListener('click', (e) => {
+        // Si el click fue en un botón de acción, no abrir detalle
+        if (e.target.closest('.card-action-btn')) return;
         const card = cards.find((c) => c.id === el.dataset.id);
         if (card) openCardDetail(card);
+      });
+    });
+
+    // Botones de acción directa (editar / borrar)
+    root.querySelectorAll('[data-act="edit"]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const card = cards.find((c) => c.id === btn.dataset.id);
+        if (card) openCardForm(card);
+      });
+    });
+    root.querySelectorAll('[data-act="delete"]').forEach((btn) => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const card = cards.find((c) => c.id === btn.dataset.id);
+        if (!card) return;
+        const ok = await confirm({
+          title: '¿Eliminar tarjeta?',
+          message: `Se desactivará "${card.name}". Sus gastos no se borrarán.`,
+          confirmText: 'Eliminar',
+          danger: true
+        });
+        if (!ok) return;
+        try {
+          await deleteCard(card.id);
+          await refreshAll();
+          toast('Tarjeta eliminada');
+        } catch (e) {
+          toast('Error: ' + e.message);
+        }
       });
     });
   }

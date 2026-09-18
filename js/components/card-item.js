@@ -58,6 +58,19 @@ export function cardItem(card, { spent = 0 } = {}) {
           <div style="height:100%;width:${uso}%;background:${invert};border-radius:inherit"></div>
         </div>
       </div>
+
+      <div class="card-actions" style="margin-top:18px;border-top:1px solid rgba(255,255,255,0.16);padding-top:14px;display:flex;gap:8px;justify-content:flex-end">
+        <button type="button" class="card-action-btn" data-act="edit" data-id="${card.id}"
+          style="background:rgba(255,255,255,0.14);color:${invert};border:1px solid rgba(255,255,255,0.2);padding:8px 14px;border-radius:8px;font-family:var(--f-ui);font-size:12.5px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px;letter-spacing:-0.005em">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Editar
+        </button>
+        <button type="button" class="card-action-btn" data-act="delete" data-id="${card.id}"
+          style="background:rgba(255,255,255,0.08);color:${invert};border:1px solid rgba(255,255,255,0.16);padding:8px 14px;border-radius:8px;font-family:var(--f-ui);font-size:12.5px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px;letter-spacing:-0.005em">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Borrar
+        </button>
+      </div>
     </article>
   `;
 }

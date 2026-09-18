@@ -975,7 +975,8 @@ body {
   .desktop-nav { display: flex; }
   .quick-actions { display: flex; gap: 8px; }
 
-  /* PC: #app ocupa todo el ancho a la derecha de la sidebar */
+  /* PC: #app ocupa todo el ancho a la derecha de la sidebar.
+     El .page dentro se centra con max-width para legibilidad. */
   #app {
     width: calc(100% - 248px);
     margin-left: 248px;
@@ -984,9 +985,11 @@ body {
     box-sizing: border-box;
   }
 
-  /* .page ocupa todo el ancho del #app (sin max-width restrictivo) */
+  /* .page centrado en el área visible del #app */
   .page {
-    max-width: none;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   /* Header de cada vista: mejor distribución en PC */
