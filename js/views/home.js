@@ -106,10 +106,10 @@ export async function homeView(root) {
           <div style="margin-top:32px">
             <div class="section-header">
               <span class="t-eyebrow">Próximos pagos</span>
-              <button class="btn-link btn-sm" id="go-payments" style="border:none;cursor:pointer">Ver todos</button>
+              <button class="btn-link btn-sm" id="go-upcoming" style="border:none;cursor:pointer">Ver calendario →</button>
             </div>
             <div class="list">
-              ${proximosPagos.map((p) => {
+              ${proximosPagos.slice(0, 3).map((p) => {
                 const dias = diffDias(p.due_date);
                 const tono = dias <= 1 ? 'pill-clay' : dias <= 3 ? 'pill-ochre' : '';
                 const fecha = dias <= 0 ? 'Vence hoy' : dias === 1 ? 'Mañana' : `en ${dias} días`;
@@ -186,8 +186,8 @@ export async function homeView(root) {
     if (goAll) goAll.onclick = () => navigate('/cards');
     const goExp = root.querySelector('#see-all-exp');
     if (goExp) goExp.onclick = () => navigate('/expenses');
-    const goPay = root.querySelector('#go-payments');
-    if (goPay) goPay.onclick = () => navigate('/payments');
+    const goPay = root.querySelector('#go-upcoming');
+    if (goPay) goPay.onclick = () => navigate('/upcoming');
     root.querySelectorAll('[data-id]').forEach((el) => {
       if (el.closest('button')) return;
       el.style.cursor = 'pointer';

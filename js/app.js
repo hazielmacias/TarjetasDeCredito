@@ -9,6 +9,7 @@ import { paymentsView, paymentFormView } from './views/payments.js';
 import { categoriesView } from './views/categories.js';
 import { settingsView } from './views/settings.js';
 import { historyView } from './views/history.js';
+import { upcomingView } from './views/upcoming.js';
 
 import { signInShared, getSession } from './supabase.js';
 
@@ -63,6 +64,10 @@ route('/payments/new', async (root) => {
     : window.location.search.replace(/^\?/, '');
   const qs = Object.fromEntries(new URLSearchParams(searchStr));
   return paymentFormView(root, qs);
+});
+route('/upcoming', async (root) => {
+  if (!getState().room) return navigate('/welcome');
+  return upcomingView(root);
 });
 route('/categories', async (root) => {
   if (!getState().room) return navigate('/welcome');
