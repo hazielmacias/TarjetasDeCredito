@@ -26,7 +26,7 @@ export async function homeView(root) {
   window.addEventListener('nf-device-owner-change', onStorage);
 
   function render() {
-    const { room, cards, expenses, payments, currentMonth } = state;
+    const { room, cards, expenses, payments, categories, currentMonth } = state;
     const { year, month } = currentMonth;
 
     const monthExpenses = expenses.filter((e) => e.year === year && e.month === month);
