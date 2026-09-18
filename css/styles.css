@@ -899,6 +899,88 @@ body {
 }
 
 /* ==========================================================
+   Desktop nav — sidebar lateral estilo Moleskine
+   ========================================================== */
+.desktop-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 248px;
+  background: var(--paper-soft);
+  border-right: 1px solid var(--ink-08);
+  padding: 28px 16px 24px;
+  display: none;
+  flex-direction: column;
+  z-index: 50;
+}
+.desktop-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 8px 24px;
+  border-bottom: 1px solid var(--ink-08);
+  margin-bottom: 16px;
+}
+.desktop-nav-title {
+  display: flex;
+  flex-direction: column;
+}
+.desktop-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+.desktop-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: var(--r-2);
+  color: var(--ink-60);
+  font-family: var(--f-ui);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  cursor: pointer;
+  transition: all 180ms ease;
+  border: none;
+  background: transparent;
+  text-align: left;
+  width: 100%;
+}
+.desktop-nav-item:hover {
+  background: var(--ink-04);
+  color: var(--ink);
+}
+.desktop-nav-item.active {
+  background: var(--ink);
+  color: var(--paper);
+}
+.desktop-nav-item svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.desktop-nav-footer {
+  padding: 16px 8px 4px;
+  border-top: 1px solid var(--ink-08);
+  color: var(--ink-40);
+  font-family: var(--f-display);
+  font-style: italic;
+}
+
+@media (min-width: 768px) {
+  .desktop-nav { display: flex; }
+  #app {
+    margin-left: 248px;
+    max-width: none;
+    padding-bottom: 24px;
+  }
+}
+
+/* ==========================================================
    Hover/click affordances — más explícitos en PC
    ========================================================== */
 @media (hover: hover) {

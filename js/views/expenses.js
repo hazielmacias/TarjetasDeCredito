@@ -102,6 +102,7 @@ export async function expensesView(root) {
 export async function expenseFormView(root, qs = {}) {
   const state = getState();
   const { cards, categories, room, currentMonth } = state;
+  const deviceOwner = (() => { try { return localStorage.getItem('nf-device-owner') || 'Haziel'; } catch { return 'Haziel'; } })();
 
   root.innerHTML = `
     <section class="page-enter page">
@@ -176,7 +177,6 @@ export async function expenseFormView(root, qs = {}) {
     </section>
   `;
 
-  const deviceOwner = (() => { try { return localStorage.getItem('nf-device-owner') || 'Haziel'; } catch { return 'Haziel'; } })();
   let selected = { category: null, method: 'card', card: null, owner: deviceOwner };
 
   function updateCardVisibility() {

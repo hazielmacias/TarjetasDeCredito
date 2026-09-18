@@ -1,9 +1,18 @@
 /**
  * Router minimalista basado en hash (#/path).
  */
+import { renderDesktopNav } from './components/desktop-nav.js';
+
 const routes = new Map();
 let currentRoute = null;
 let cleanup = null;
+let desktopNavEl = null;
+
+function ensureDesktopNav() {
+  if (desktopNavEl && document.body.contains(desktopNavEl)) return;
+  desktopNavEl = renderDesktopNav();
+  document.body.appendChild(desktopNavEl);
+}
 
 export function route(path, handler) {
   routes.set(path, handler);
@@ -24,6 +33,14 @@ export function currentPath() {
   return h;
 }
 
+export function refreshDesktopNav() {
+  if (desktopNavEl && document.body.contains(desktopNavEl)) {
+    desktopNavEl.remove();
+  }
+  desktopNavEl = null;
+  ensureDesktopNav();
+}
+
 export async function render() {
   const path = currentPath();
   const handler = routes.get(path) || routes.get('/');
@@ -36,10 +53,31 @@ export async function render() {
   }
 
   const root = document.getElementById('app');
+  if (!root) return;
   root.innerHTML = '';
 
   if (handler) {
-    const result = await handler(root);
-    if (typeof result === 'function') cleanup = result;
+    try {
+      const result = await handler(root);
+      if (typeof result === 'function') cleanup = result;
+    } catch (e) {
+      console.error('Render error:', e);
+      root.innerHTML = `
+        <section class="page page-enter" style="padding-top:48px;text-align:center">
+          <div class="t-display" style="margin-bottom:16px">Algo salió mal</div>
+          <p class="t-serif-body">${(e && e.message) || 'Error desconocido'}</p>
+          <button class="btn btn-ink btn-block" style="margin-top:24px" onclick="window.location.reload()">Recargar</button>
+        </section>
+      `;
+    }
   }
+
+  ensureDesktopNav();
+}
+
+// Inicializar la nav al cargar
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', ensureDesktopNav);
+} else {
+  ensureDesktopNav();
 }
