@@ -12,13 +12,21 @@ import { historyView } from './views/history.js';
 
 import { signInShared, getSession } from './supabase.js';
 
-// Registrar service worker
+// Desregistrar SW viejo y limpiar caches (fix de layout PC)
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
     try {
-      await navigator.serviceWorker.register('./service-worker.js', { scope: './' });
+      // Borrar TODOS los caches existentes
+      if (caches && caches.keys) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((k) => caches.delete(k)));
+      }
+      // Desregistrar todos los SW
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map((reg) => reg.unregister()));
+      console.info('[NF] Service worker desregistrado, caches limpiados');
     } catch (e) {
-      console.warn('SW no registrado:', e);
+      console.warn('Limpieza SW:', e);
     }
   });
 }
