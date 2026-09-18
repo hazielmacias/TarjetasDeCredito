@@ -975,11 +975,23 @@ body {
   .desktop-nav { display: flex; }
   .quick-actions { display: flex; gap: 8px; }
 
+  /* PC: #app se posiciona después de la sidebar (248px) y el contenido
+     visible se centra en el área restante. Usa padding-inline generoso
+     cuando el viewport es amplio, o padding mínimo (296px = 248 sidebar
+     + 48 gap) cuando es estrecho. */
   #app {
+    width: calc(100% - 248px);
     margin-left: 248px;
-    max-width: 1080px;
-    padding: 0 48px;
-    padding-bottom: 64px;
+    margin-right: auto;
+    padding: 0 48px 64px;
+    box-sizing: border-box;
+  }
+
+  /* Cada vista (.page) se centra en el ancho del #app */
+  .page {
+    max-width: 880px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   /* Pages con más aire */
@@ -1041,7 +1053,7 @@ body {
 
 /* Pantallas muy anchas: limitar contenido para legibilidad */
 @media (min-width: 1280px) {
-  #app { max-width: 1180px; }
+  .page { max-width: 940px; }
 }
 
 /* ==========================================================
